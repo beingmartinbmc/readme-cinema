@@ -200,8 +200,11 @@ We welcome contributions from the community! Here's how you can help improve REA
 ### 🚀 Getting Started
 
 1. **Fork the repository**
+   - Go to [https://github.com/beingmartinbmc/readme-cinema](https://github.com/beingmartinbmc/readme-cinema)
+   - Click the "Fork" button in the top right
+   - Clone your forked repository:
    ```bash
-   git clone https://github.com/your-username/readme-cinema.git
+   git clone https://github.com/YOUR_USERNAME/readme-cinema.git
    cd readme-cinema
    ```
 
