@@ -104,20 +104,57 @@ Welcome to my project! This text will type out character by character...
 
 **🎬 Try it yourself:**
 ```bash
-# Quick demo (shows multiple themes)
+# Install and run
+npm install -g readme-cinema
+readme-cinema --color neon --progress
+
+# Or clone and run locally
 git clone https://github.com/beingmartinbmc/readme-cinema.git
 cd readme-cinema
 npm install
 node quick-demo.js
-
-# Or run with your own README
-readme-cinema --color neon --progress
 ```
 
 **📱 Share your cinematic README:**
 - Record your terminal with `readme-cinema` in action
 - Share on Twitter, LinkedIn, or YouTube
 - Tag us: `#readmecinema` `#terminalart` `#cli`
+
+### 🎬 Demo Preview
+
+Here's what the `quick-demo.js` shows you:
+
+**Theme 1: Hacker (Green)**
+```
+██████╗ ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗
+██╔══██╗██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
+██████╔╝█████╗  ███████║██║  ██║██╔████╔██║█████╗
+██╔══██╗██╔══╝  ██╔══██║██║  ██║██║╚██╔╝██║██╔══╝
+██║  ██║███████╗██║  ██║██████╔╝██║ ╚═╝ ██║███████╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚══════╝
+
+# 🚀 My Awesome Project
+
+Welcome to my project! This text will type out character by character...
+
+                                              SCENE TRANSITION
+
+## ✨ Features
+
+• Lightning Fast ██████████░░ 90%
+• Cross Platform █████████░░░ 80%
+• Easy Integration ████████░░░░ 70%
+```
+
+**Theme 2: Neon (Magenta/Cyan)**
+```
+[Same content with magenta/cyan colors and neon glow effects]
+```
+
+**Theme 3: Cyberpunk (Futuristic)**
+```
+[Same content with cyberpunk styling and effects]
+```
 
 ## 📦 Installation
 
@@ -247,6 +284,33 @@ Tag us on social media with your cinematic README videos:
 - **LinkedIn**: Show off your documentation skills
 - **YouTube**: Create tutorials or showcase videos
 - **GitHub**: Add a demo GIF to your project README
+
+### 🎬 Creating Demo GIFs for GitHub
+
+Want to add a cinematic demo to your project's README?
+
+1. **Record your terminal:**
+   ```bash
+   # Use terminal recording tools
+   asciinema rec demo.cast
+   # or
+   ttyrec demo.rec
+   ```
+
+2. **Convert to GIF:**
+   ```bash
+   # Convert asciinema to GIF
+   asciinema-gif demo.cast demo.gif
+   ```
+
+3. **Add to your README:**
+   ```markdown
+   # My Project
+   
+   ![Demo](demo.gif)
+   
+   Transform your README with cinematic effects!
+   ```
 
 ## Contributing
 
