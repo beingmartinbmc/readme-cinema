@@ -8,7 +8,14 @@
   },
   "scripts": {
     "start": "node ./bin/cli.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node ./bin/cli.js README.md --color neon --progress",
+    "demo": "node quick-demo.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "echo \"No linter configured yet\"",
+    "build": "echo \"No build step needed\"",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "cli",
@@ -32,12 +39,15 @@
   "homepage": "https://github.com/beingmartinbmc/readme-cinema#readme",
   "dependencies": {
     "chalk": "^5.3.0",
-    "figlet": "^1.6.0",
-    "ora": "^7.0.1",
     "cli-progress": "^3.12.0",
-    "marked": "^9.1.6",
     "commander": "^11.1.0",
-    "fs-extra": "^11.1.1"
+    "figlet": "^1.6.0",
+    "fs-extra": "^11.1.1",
+    "marked": "^9.1.6",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   },
   "type": "module"
 }
