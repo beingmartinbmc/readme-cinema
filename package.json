@@ -1,10 +1,43 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "readme-cinema",
   "version": "1.0.0",
-  "description": "",
+  "description": "Transform your README files into cinematic terminal experiences with ASCII art, typewriter effects, and dramatic transitions",
   "main": "index.js",
+  "bin": {
+    "readme-cinema": "./bin/cli.js"
+  },
   "scripts": {
+    "start": "node ./bin/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "private": true
+  "keywords": [
+    "cli",
+    "readme",
+    "terminal",
+    "ascii",
+    "cinematic",
+    "typewriter",
+    "hacker",
+    "markdown"
+  ],
+  "author": "Ankit Sharma <ankit.sharma199803@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beingmartinbmc/readme-cinema.git"
+  },
+  "bugs": {
+    "url": "https://github.com/beingmartinbmc/readme-cinema/issues"
+  },
+  "homepage": "https://github.com/beingmartinbmc/readme-cinema#readme",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "figlet": "^1.6.0",
+    "ora": "^7.0.1",
+    "cli-progress": "^3.12.0",
+    "marked": "^9.1.6",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.1.1"
+  },
+  "type": "module"
 }

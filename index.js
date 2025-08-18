@@ -1,1 +1,1 @@
-console.log('Happy developing ✨')
+export { readmeCinema } from './src/index.js';

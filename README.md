@@ -140,11 +140,82 @@ When you run readme-cinema, you'll see:
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions from the community! Here's how you can help improve README Cinema:
+
+### 🚀 Getting Started
+
+1. **Fork the repository**
+   ```bash
+   git clone https://github.com/your-username/readme-cinema.git
+   cd readme-cinema
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Create your feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+
+### 🛠️ Development
+
+- **Run the CLI locally**: `node bin/cli.js README.md`
+- **Test different themes**: `node bin/cli.js --color neon --progress`
+- **Run the demo**: `node demo.js`
+
+### 📝 Making Changes
+
+1. **Make your changes** - Add new features, fix bugs, or improve documentation
+2. **Test your changes** - Ensure everything works as expected
+3. **Commit your changes**
+   ```bash
+   git commit -m 'feat: add new transition effect'
+   git commit -m 'fix: resolve syntax highlighting issue'
+   git commit -m 'docs: update installation instructions'
+   ```
+4. **Push to your branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request** with a clear description of your changes
+
+### 🎯 Areas for Contribution
+
+- **New Color Themes** - Add more visual themes
+- **Transition Effects** - Create new cinematic transitions
+- **Progress Bar Styles** - Design new progress animations
+- **Syntax Highlighting** - Support for more programming languages
+- **Performance Improvements** - Optimize typing speed and effects
+- **Documentation** - Improve README, add examples, or create tutorials
+- **Bug Fixes** - Report and fix issues
+
+### 📋 Pull Request Guidelines
+
+- **Clear title** describing the change
+- **Detailed description** of what was changed and why
+- **Test coverage** for new features
+- **Documentation updates** if needed
+- **Follow existing code style** and conventions
+
+### 🐛 Reporting Issues
+
+Found a bug or have a feature request? Please [open an issue](https://github.com/beingmartinbmc/readme-cinema/issues) with:
+
+- **Clear description** of the problem
+- **Steps to reproduce** the issue
+- **Expected vs actual behavior**
+- **Environment details** (OS, Node.js version, etc.)
+
+### 📄 Code of Conduct
+
+This project is open to everyone. Please be respectful and inclusive in all interactions.
+
+## Author
+
+**Ankit Sharma** - [ankit.sharma199803@gmail.com](mailto:ankit.sharma199803@gmail.com)
 
 ## License
 
