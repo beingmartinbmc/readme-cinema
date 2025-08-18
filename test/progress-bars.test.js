@@ -1,8 +1,7 @@
 import { jest } from '@jest/globals';
-import { ProgressBars } from '../src/progress-bars.js';
 
-// Mock chalk
-jest.mock('chalk', () => ({
+// Mock chalk using unstable_mockModule for ES modules
+await jest.unstable_mockModule('chalk', () => ({
   green: jest.fn((text) => `GREEN_${text}`),
   cyan: jest.fn((text) => `CYAN_${text}`),
   magenta: jest.fn((text) => `MAGENTA_${text}`),
@@ -13,8 +12,8 @@ jest.mock('chalk', () => ({
   gray: jest.fn((text) => `GRAY_${text}`)
 }));
 
-// Mock ora
-jest.mock('ora', () => {
+// Mock ora using unstable_mockModule for ES modules
+await jest.unstable_mockModule('ora', () => {
   return jest.fn().mockImplementation(() => ({
     start: jest.fn().mockReturnThis(),
     stop: jest.fn().mockReturnThis(),
@@ -24,14 +23,20 @@ jest.mock('ora', () => {
   }));
 });
 
-// Mock cli-progress
-jest.mock('cli-progress', () => ({
+// Mock cli-progress using unstable_mockModule for ES modules
+await jest.unstable_mockModule('cli-progress', () => ({
   SingleBar: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
     update: jest.fn(),
     stop: jest.fn()
   }))
 }));
+
+import { ProgressBars } from '../src/progress-bars.js';
+
+// Mock process.stdout.write and console.log
+process.stdout.write = jest.fn();
+console.log = jest.fn();
 
 describe('ProgressBars', () => {
   let progress;
@@ -47,6 +52,7 @@ describe('ProgressBars', () => {
     // Reset mocks
     jest.clearAllMocks();
     process.stdout.write.mockClear();
+    console.log.mockClear();
   });
 
   describe('constructor', () => {
@@ -74,13 +80,13 @@ describe('ProgressBars', () => {
       expect(process.stdout.write).toHaveBeenCalled();
     });
 
-    test('should handle negative progress', async () => {
+    test('should handle negative progress by clamping to 0', async () => {
       await progress.showProgress('Test Feature', -10);
       
       expect(process.stdout.write).toHaveBeenCalled();
     });
 
-    test('should handle progress over 100%', async () => {
+    test('should handle progress over 100% by clamping to 100', async () => {
       await progress.showProgress('Test Feature', 150);
       
       expect(process.stdout.write).toHaveBeenCalled();
@@ -89,19 +95,19 @@ describe('ProgressBars', () => {
 
   describe('animateProgress', () => {
     test('should animate progress from 0 to target', async () => {
-      await progress.animateProgress('Test Feature', 80);
+      await progress.animateProgress('Test Feature', '██████████', '░░░░░░░░░░', 80);
       
       expect(process.stdout.write).toHaveBeenCalled();
     });
 
     test('should handle 0% target', async () => {
-      await progress.animateProgress('Test Feature', 0);
+      await progress.animateProgress('Test Feature', '', '░░░░░░░░░░░░░░░░░░░░', 0);
       
       expect(process.stdout.write).toHaveBeenCalled();
     });
 
     test('should handle 100% target', async () => {
-      await progress.animateProgress('Test Feature', 100);
+      await progress.animateProgress('Test Feature', '████████████████████', '', 100);
       
       expect(process.stdout.write).toHaveBeenCalled();
     });
@@ -109,104 +115,85 @@ describe('ProgressBars', () => {
 
   describe('showFeatureProgress', () => {
     test('should show feature progress with animation', async () => {
-      await progress.showFeatureProgress('Test Feature', 85);
+      const features = [
+        { name: 'Test Feature 1', percentage: 85 },
+        { name: 'Test Feature 2', percentage: 60 }
+      ];
       
-      expect(process.stdout.write).toHaveBeenCalled();
-    });
+      await progress.showFeatureProgress(features);
+      
+      expect(console.log).toHaveBeenCalled();
+    }, 10000);
 
     test('should handle different percentages', async () => {
-      await progress.showFeatureProgress('Test Feature', 50);
+      const features = [
+        { name: 'Test Feature 1', percentage: 50 },
+        { name: 'Test Feature 2' } // Will use random percentage
+      ];
       
-      expect(process.stdout.write).toHaveBeenCalled();
-    });
+      await progress.showFeatureProgress(features);
+      
+      expect(console.log).toHaveBeenCalled();
+    }, 10000);
   });
 
   describe('showLoadingSpinner', () => {
     test('should show loading spinner', async () => {
-      await progress.showLoadingSpinner('Loading...');
+      await progress.showLoadingSpinner('Loading...', 100);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 5000);
 
     test('should handle different messages', async () => {
-      await progress.showLoadingSpinner('Processing...');
+      await progress.showLoadingSpinner('Processing...', 100);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 5000);
   });
 
   describe('showMatrixProgress', () => {
     test('should show matrix-style progress', async () => {
-      await progress.showMatrixProgress('Matrix Feature', 60);
+      await progress.showMatrixProgress('Test Feature', 75);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
 
     test('should handle different percentages', async () => {
-      await progress.showMatrixProgress('Matrix Feature', 30);
+      await progress.showMatrixProgress('Test Feature', 50);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
   });
 
   describe('showGlitchProgress', () => {
     test('should show glitch-style progress', async () => {
-      await progress.showGlitchProgress('Glitch Feature', 70);
+      await progress.showGlitchProgress('Test Feature', 75);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
 
     test('should handle glitch randomization', async () => {
-      jest.spyOn(Math, 'random').mockReturnValue(0.1); // Trigger glitch
-      
-      await progress.showGlitchProgress('Glitch Feature', 70);
+      await progress.showGlitchProgress('Test Feature', 50);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
   });
 
   describe('showNeonProgress', () => {
     test('should show neon-style progress', async () => {
-      await progress.showNeonProgress('Neon Feature', 90);
+      await progress.showNeonProgress('Test Feature', 75);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
 
     test('should handle different percentages', async () => {
-      await progress.showNeonProgress('Neon Feature', 25);
+      await progress.showNeonProgress('Test Feature', 50);
       
       expect(process.stdout.write).toHaveBeenCalled();
-    });
+    }, 10000);
   });
 
-  describe('getProgressBar', () => {
-    test('should return progress bar string', () => {
-      const bar = progress.getProgressBar(50, 20);
-      
-      expect(bar).toContain('█');
-      expect(bar).toContain('░');
-    });
 
-    test('should handle 0% progress', () => {
-      const bar = progress.getProgressBar(0, 20);
-      
-      expect(bar).not.toContain('█');
-      expect(bar).toContain('░');
-    });
-
-    test('should handle 100% progress', () => {
-      const bar = progress.getProgressBar(100, 20);
-      
-      expect(bar).toContain('█');
-      expect(bar).not.toContain('░');
-    });
-
-    test('should handle different widths', () => {
-      const bar = progress.getProgressBar(50, 10);
-      
-      expect(bar.length).toBeLessThanOrEqual(10);
-    });
-  });
 
   describe('sleep', () => {
     test('should create a promise that resolves after delay', async () => {

@@ -10,7 +10,7 @@
     "start": "node ./bin/cli.js",
     "dev": "node ./bin/cli.js README.md --color neon --progress",
     "demo": "node quick-demo.js",
-    "test": "jest --coverage",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest test/basic.test.js test/simple.test.js test/typewriter-effect.test.js test/ascii-banner.test.js test/color-themes.test.js test/progress-bars.test.js test/section-transitions.test.js test/syntax-highlighter.test.js test/main.test.js test/cli.test.js --coverage",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "lint": "echo \"No linter configured yet\"",

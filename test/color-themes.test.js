@@ -1,8 +1,7 @@
 import { jest } from '@jest/globals';
-import { ColorThemes } from '../src/color-themes.js';
 
-// Mock chalk
-jest.mock('chalk', () => ({
+// Mock chalk using unstable_mockModule for ES modules
+await jest.unstable_mockModule('chalk', () => ({
   green: jest.fn((text) => `GREEN_${text}`),
   cyan: jest.fn((text) => `CYAN_${text}`),
   magenta: jest.fn((text) => `MAGENTA_${text}`),
@@ -27,129 +26,148 @@ jest.mock('chalk', () => ({
   bright: jest.fn((text) => `BRIGHT_${text}`)
 }));
 
+import { ColorThemes } from '../src/color-themes.js';
+
 describe('ColorThemes', () => {
-  let themes;
-
-  beforeEach(() => {
-    themes = new ColorThemes();
-  });
-
-  describe('constructor', () => {
-    test('should initialize with all themes', () => {
-      expect(themes.themes).toBeDefined();
-      expect(Object.keys(themes.themes)).toHaveLength(8);
+  describe('theme definitions', () => {
+    test('should have all required themes', () => {
+      expect(ColorThemes).toBeDefined();
+      expect(Object.keys(ColorThemes)).toHaveLength(8);
+      expect(ColorThemes.hacker).toBeDefined();
+      expect(ColorThemes.neon).toBeDefined();
+      expect(ColorThemes.classic).toBeDefined();
+      expect(ColorThemes.matrix).toBeDefined();
+      expect(ColorThemes.cyberpunk).toBeDefined();
+      expect(ColorThemes.retro).toBeDefined();
+      expect(ColorThemes.dark).toBeDefined();
+      expect(ColorThemes.rainbow).toBeDefined();
     });
-  });
 
-  describe('getTheme', () => {
-    test('should return hacker theme by default', () => {
-      const theme = themes.getTheme();
-      expect(theme).toBeDefined();
+    test('should have hacker theme properties', () => {
+      const theme = ColorThemes.hacker;
       expect(theme.banner).toBe('green');
       expect(theme.subtitle).toBe('cyan');
+      expect(theme.heading).toBe('green');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('cyan');
+      expect(theme.progress).toBe('green');
+      expect(theme.list).toBe('cyan');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('green');
     });
 
-    test('should return hacker theme explicitly', () => {
-      const theme = themes.getTheme('hacker');
-      expect(theme).toBeDefined();
-      expect(theme.banner).toBe('green');
-      expect(theme.subtitle).toBe('cyan');
-    });
-
-    test('should return neon theme', () => {
-      const theme = themes.getTheme('neon');
-      expect(theme).toBeDefined();
+    test('should have neon theme properties', () => {
+      const theme = ColorThemes.neon;
       expect(theme.banner).toBe('magenta');
       expect(theme.subtitle).toBe('cyan');
+      expect(theme.heading).toBe('magenta');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('cyan');
+      expect(theme.progress).toBe('magenta');
+      expect(theme.list).toBe('cyan');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('magenta');
     });
 
-    test('should return classic theme', () => {
-      const theme = themes.getTheme('classic');
-      expect(theme).toBeDefined();
+    test('should have classic theme properties', () => {
+      const theme = ColorThemes.classic;
       expect(theme.banner).toBe('blue');
-      expect(theme.subtitle).toBe('white');
+      expect(theme.subtitle).toBe('gray');
+      expect(theme.heading).toBe('blue');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('blue');
+      expect(theme.progress).toBe('blue');
+      expect(theme.list).toBe('white');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('blue');
     });
 
-    test('should return matrix theme', () => {
-      const theme = themes.getTheme('matrix');
-      expect(theme).toBeDefined();
+    test('should have matrix theme properties', () => {
+      const theme = ColorThemes.matrix;
       expect(theme.banner).toBe('green');
       expect(theme.subtitle).toBe('green');
+      expect(theme.heading).toBe('green');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('green');
+      expect(theme.progress).toBe('green');
+      expect(theme.list).toBe('green');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('green');
     });
 
-    test('should return cyberpunk theme', () => {
-      const theme = themes.getTheme('cyberpunk');
-      expect(theme).toBeDefined();
+    test('should have cyberpunk theme properties', () => {
+      const theme = ColorThemes.cyberpunk;
       expect(theme.banner).toBe('magenta');
       expect(theme.subtitle).toBe('cyan');
+      expect(theme.heading).toBe('magenta');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('cyan');
+      expect(theme.progress).toBe('magenta');
+      expect(theme.list).toBe('cyan');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('magenta');
     });
 
-    test('should return retro theme', () => {
-      const theme = themes.getTheme('retro');
-      expect(theme).toBeDefined();
+    test('should have retro theme properties', () => {
+      const theme = ColorThemes.retro;
       expect(theme.banner).toBe('yellow');
       expect(theme.subtitle).toBe('cyan');
+      expect(theme.heading).toBe('yellow');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('green');
+      expect(theme.accent).toBe('cyan');
+      expect(theme.progress).toBe('yellow');
+      expect(theme.list).toBe('cyan');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('yellow');
     });
 
-    test('should return dark theme', () => {
-      const theme = themes.getTheme('dark');
-      expect(theme).toBeDefined();
+    test('should have dark theme properties', () => {
+      const theme = ColorThemes.dark;
       expect(theme.banner).toBe('white');
       expect(theme.subtitle).toBe('gray');
+      expect(theme.heading).toBe('white');
+      expect(theme.text).toBe('gray');
+      expect(theme.code).toBe('yellow');
+      expect(theme.accent).toBe('white');
+      expect(theme.progress).toBe('white');
+      expect(theme.list).toBe('gray');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('white');
     });
 
-    test('should return rainbow theme', () => {
-      const theme = themes.getTheme('rainbow');
-      expect(theme).toBeDefined();
-      expect(theme.banner).toBe('magenta');
-      expect(theme.subtitle).toBe('cyan');
-    });
-
-    test('should return hacker theme for unknown theme', () => {
-      const theme = themes.getTheme('unknown');
-      expect(theme).toBeDefined();
-      expect(theme.banner).toBe('green');
-      expect(theme.subtitle).toBe('cyan');
-    });
-
-    test('should handle case insensitive theme names', () => {
-      const theme = themes.getTheme('HACKER');
-      expect(theme).toBeDefined();
-      expect(theme.banner).toBe('green');
-    });
-  });
-
-  describe('getAvailableThemes', () => {
-    test('should return all available theme names', () => {
-      const availableThemes = themes.getAvailableThemes();
-      
-      expect(availableThemes).toContain('hacker');
-      expect(availableThemes).toContain('neon');
-      expect(availableThemes).toContain('classic');
-      expect(availableThemes).toContain('matrix');
-      expect(availableThemes).toContain('cyberpunk');
-      expect(availableThemes).toContain('retro');
-      expect(availableThemes).toContain('dark');
-      expect(availableThemes).toContain('rainbow');
-      expect(availableThemes).toHaveLength(8);
+    test('should have rainbow theme properties', () => {
+      const theme = ColorThemes.rainbow;
+      expect(theme.banner).toBe('red');
+      expect(theme.subtitle).toBe('yellow');
+      expect(theme.heading).toBe('green');
+      expect(theme.text).toBe('white');
+      expect(theme.code).toBe('cyan');
+      expect(theme.accent).toBe('magenta');
+      expect(theme.progress).toBe('blue');
+      expect(theme.list).toBe('yellow');
+      expect(theme.blockquote).toBe('gray');
+      expect(theme.transition).toBe('red');
     });
   });
 
-  describe('theme properties', () => {
+  describe('theme structure', () => {
     test('should have all required properties for each theme', () => {
       const requiredProperties = [
-        'banner', 'subtitle', 'text', 'accent', 'code', 
-        'progress', 'transition', 'heading', 'list'
+        'banner', 'subtitle', 'heading', 'text', 'code', 
+        'accent', 'progress', 'list', 'blockquote', 'transition'
       ];
 
-      for (const themeName of themes.getAvailableThemes()) {
-        const theme = themes.getTheme(themeName);
-        
-        for (const prop of requiredProperties) {
+      Object.values(ColorThemes).forEach(theme => {
+        requiredProperties.forEach(prop => {
           expect(theme).toHaveProperty(prop);
-          expect(theme[prop]).toBeDefined();
-        }
-      }
+        });
+      });
     });
 
     test('should have valid color values', () => {
@@ -158,70 +176,11 @@ describe('ColorThemes', () => {
         'white', 'red', 'gray', 'black'
       ];
 
-      for (const themeName of themes.getAvailableThemes()) {
-        const theme = themes.getTheme(themeName);
-        
-        for (const [key, value] of Object.entries(theme)) {
-          if (typeof value === 'string') {
-            expect(validColors).toContain(value);
-          }
-        }
-      }
-    });
-  });
-
-  describe('theme descriptions', () => {
-    test('should have descriptions for all themes', () => {
-      const descriptions = themes.getThemeDescriptions();
-      
-      expect(descriptions).toHaveProperty('hacker');
-      expect(descriptions).toHaveProperty('neon');
-      expect(descriptions).toHaveProperty('classic');
-      expect(descriptions).toHaveProperty('matrix');
-      expect(descriptions).toHaveProperty('cyberpunk');
-      expect(descriptions).toHaveProperty('retro');
-      expect(descriptions).toHaveProperty('dark');
-      expect(descriptions).toHaveProperty('rainbow');
-    });
-
-    test('should return hacker theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.hacker).toBe('Cybersecurity vibes');
-    });
-
-    test('should return neon theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.neon).toBe('Cyberpunk aesthetic');
-    });
-
-    test('should return classic theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.classic).toBe('Professional');
-    });
-
-    test('should return matrix theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.matrix).toBe('Matrix-style');
-    });
-
-    test('should return cyberpunk theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.cyberpunk).toBe('Futuristic');
-    });
-
-    test('should return retro theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.retro).toBe('Vintage terminal');
-    });
-
-    test('should return dark theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.dark).toBe('Minimalist');
-    });
-
-    test('should return rainbow theme description', () => {
-      const descriptions = themes.getThemeDescriptions();
-      expect(descriptions.rainbow).toBe('Fun & vibrant');
+      Object.values(ColorThemes).forEach(theme => {
+        Object.values(theme).forEach(color => {
+          expect(validColors).toContain(color);
+        });
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 describe('README Cinema CLI', () => {
   test('should show help information', () => {

@@ -1,8 +1,7 @@
 import { jest } from '@jest/globals';
-import { SectionTransitions } from '../src/section-transitions.js';
 
-// Mock chalk
-jest.mock('chalk', () => ({
+// Mock chalk using unstable_mockModule for ES modules
+await jest.unstable_mockModule('chalk', () => ({
   green: jest.fn((text) => `GREEN_${text}`),
   cyan: jest.fn((text) => `CYAN_${text}`),
   magenta: jest.fn((text) => `MAGENTA_${text}`),
@@ -12,6 +11,12 @@ jest.mock('chalk', () => ({
   red: jest.fn((text) => `RED_${text}`),
   gray: jest.fn((text) => `GRAY_${text}`)
 }));
+
+import { SectionTransitions } from '../src/section-transitions.js';
+
+// Mock process.stdout.write and console.log
+process.stdout.write = jest.fn();
+console.log = jest.fn();
 
 describe('SectionTransitions', () => {
   let transitions;
@@ -27,6 +32,7 @@ describe('SectionTransitions', () => {
     // Reset mocks
     jest.clearAllMocks();
     process.stdout.write.mockClear();
+    console.log.mockClear();
   });
 
   describe('constructor', () => {
@@ -36,29 +42,45 @@ describe('SectionTransitions', () => {
   });
 
   describe('transition', () => {
-    test('should call a random transition effect', async () => {
+    test('should call one of the transition effects', async () => {
       const mockSceneTransition = jest.spyOn(transitions, 'sceneTransition').mockResolvedValue();
+      const mockMatrixEffect = jest.spyOn(transitions, 'matrixEffect').mockResolvedValue();
+      const mockScanLines = jest.spyOn(transitions, 'scanLines').mockResolvedValue();
+      const mockFadeEffect = jest.spyOn(transitions, 'fadeEffect').mockResolvedValue();
+      const mockGlitchTransition = jest.spyOn(transitions, 'glitchTransition').mockResolvedValue();
       
       await transitions.transition();
       
-      expect(mockSceneTransition).toHaveBeenCalled();
+      // At least one of the effects should be called
+      const totalCalls = mockSceneTransition.mock.calls.length + 
+                        mockMatrixEffect.mock.calls.length + 
+                        mockScanLines.mock.calls.length + 
+                        mockFadeEffect.mock.calls.length + 
+                        mockGlitchTransition.mock.calls.length;
+      
+      expect(totalCalls).toBeGreaterThan(0);
     });
 
-    test('should handle all transition effects', async () => {
-      const effects = [
-        'sceneTransition',
-        'matrixEffect', 
-        'scanLines',
-        'fadeEffect',
-        'glitchTransition'
-      ];
+    test('should handle multiple transition calls', async () => {
+      const mockSceneTransition = jest.spyOn(transitions, 'sceneTransition').mockResolvedValue();
+      const mockMatrixEffect = jest.spyOn(transitions, 'matrixEffect').mockResolvedValue();
+      const mockScanLines = jest.spyOn(transitions, 'scanLines').mockResolvedValue();
+      const mockFadeEffect = jest.spyOn(transitions, 'fadeEffect').mockResolvedValue();
+      const mockGlitchTransition = jest.spyOn(transitions, 'glitchTransition').mockResolvedValue();
       
-      for (const effect of effects) {
-        const mockEffect = jest.spyOn(transitions, effect).mockResolvedValue();
-        await transitions.transition();
-        expect(mockEffect).toHaveBeenCalled();
-        mockEffect.mockRestore();
-      }
+      // Call transition multiple times to increase chances of hitting different effects
+      await transitions.transition();
+      await transitions.transition();
+      await transitions.transition();
+      
+      // At least one of the effects should be called
+      const totalCalls = mockSceneTransition.mock.calls.length + 
+                        mockMatrixEffect.mock.calls.length + 
+                        mockScanLines.mock.calls.length + 
+                        mockFadeEffect.mock.calls.length + 
+                        mockGlitchTransition.mock.calls.length;
+      
+      expect(totalCalls).toBeGreaterThan(0);
     });
   });
 

@@ -1,15 +1,14 @@
 import { jest } from '@jest/globals';
-import { AsciiBanner } from '../src/ascii-banner.js';
 
-// Mock figlet
-jest.mock('figlet', () => ({
+// Mock figlet using unstable_mockModule for ES modules
+await jest.unstable_mockModule('figlet', () => ({
   textSync: jest.fn((text, options) => {
     return `MOCKED_ASCII_ART_${text}`;
   })
 }));
 
-// Mock chalk
-jest.mock('chalk', () => ({
+// Mock chalk using unstable_mockModule for ES modules
+await jest.unstable_mockModule('chalk', () => ({
   green: jest.fn((text) => `GREEN_${text}`),
   cyan: jest.fn((text) => `CYAN_${text}`),
   magenta: jest.fn((text) => `MAGENTA_${text}`),
@@ -19,6 +18,12 @@ jest.mock('chalk', () => ({
   red: jest.fn((text) => `RED_${text}`),
   gray: jest.fn((text) => `GRAY_${text}`)
 }));
+
+import { AsciiBanner } from '../src/ascii-banner.js';
+
+// Mock process.stdout.write and console.log
+process.stdout.write = jest.fn();
+console.log = jest.fn();
 
 describe('AsciiBanner', () => {
   let banner;
@@ -34,6 +39,7 @@ describe('AsciiBanner', () => {
     // Reset mocks
     jest.clearAllMocks();
     process.stdout.write.mockClear();
+    console.log.mockClear();
   });
 
   describe('constructor', () => {

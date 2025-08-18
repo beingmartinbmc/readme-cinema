@@ -7,14 +7,16 @@ export class ProgressBars {
   }
 
   async showProgress(label, percentage) {
-    const filledLength = Math.floor((percentage / 100) * this.barLength);
-    const emptyLength = this.barLength - filledLength;
+    // Clamp percentage to 0-100 range
+    const clampedPercentage = Math.max(0, Math.min(100, percentage));
+    const filledLength = Math.floor((clampedPercentage / 100) * this.barLength);
+    const emptyLength = Math.max(0, this.barLength - filledLength);
     
     const filledBar = '█'.repeat(filledLength);
     const emptyBar = '░'.repeat(emptyLength);
     
     // Animate the progress bar
-    await this.animateProgress(label, filledBar, emptyBar, percentage);
+    await this.animateProgress(label, filledBar, emptyBar, clampedPercentage);
   }
 
   async animateProgress(label, filledBar, emptyBar, percentage) {
