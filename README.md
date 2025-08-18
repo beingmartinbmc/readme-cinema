@@ -2,22 +2,6 @@
 
 Transform your README files into cinematic terminal experiences with ASCII art, typewriter effects, and dramatic transitions.
 
-## What is README Cinema?
-
-README Cinema is a CLI tool that makes your documentation come alive! Instead of boring static text, it displays your README files with:
-
-- 🎬 **Cinematic effects** like movie scenes
-- ⌨️ **Typewriter animation** that types text character by character  
-- 🎨 **Colorful themes** from hacker green to neon pink
-- 📊 **Animated progress bars** for features
-- 🌈 **Syntax highlighting** for code blocks
-
-Perfect for:
-- **Presentations** - Wow your audience with dramatic reveals
-- **Social media** - Create shareable terminal content
-- **Documentation** - Make your READMEs memorable
-- **Streaming** - Add visual flair to your coding streams
-
 ## 🚀 Quick Start
 
 ```bash
@@ -27,57 +11,57 @@ npm install -g readme-cinema
 # Run on your README
 readme-cinema
 
-# Or with a custom file
-readme-cinema ./path/to/your/readme.md
+# Or with options
+readme-cinema --color neon --progress --speed 30
 ```
-
-That's it! Your README will now display with cinematic effects. 🎬
 
 ## ✨ Features
 
-### 🎨 ASCII Banner & Logo
-- Generate cinematic ASCII titles using figlet
-- Instant wow factor with dramatic glitch effects
-- Customizable fonts and layouts
+- **🎨 ASCII Banner** - Dramatic ASCII art titles with glitch effects
+- **⌨️ Typewriter Effect** - Text types out character by character
+- **🎭 Scene Transitions** - Movie-like transitions between sections
+- **🌈 Syntax Highlighting** - Color-coded code blocks
+- **📊 Progress Bars** - Animated progress for features
+- **🎨 8 Color Themes** - Hacker, Neon, Classic, Matrix, Cyberpunk, Retro, Dark, Rainbow
 
-### ⌨️ Typewriter / Hacker Text Effect
-- Slowly "types" the README content like a terminal hack scene
-- Adds drama and makes people want to record and share
-- Realistic typing delays and occasional "thinking" pauses
+## 🎮 Usage
 
-### 🎭 Section Transitions
-- Each section of the README appears like movie "scenes"
-- Multiple transition effects: matrix, glitch, fade, scan lines
-- Dramatic pauses between major sections
-
-### 🌈 Syntax Highlighting for Code Blocks
-- Parse markdown code snippets and display with colors
-- Support for multiple programming languages
-- Customizable color schemes
-
-### 📊 Progress Bars & Spinners
-- Animated progress bars for features and capabilities
-- Example: `Roast Intensity: █████░░░░░░░ 50%`
-- Multiple progress bar styles: matrix, glitch, neon
-
-### 📁 Custom File Input
+### Basic Usage
 ```bash
-npx readme-cinema ./docs/intro.md
+readme-cinema                    # Uses default README.md
+readme-cinema ./path/to/file.md  # Custom file
 ```
 
-## 🎬 What You'll See
+### With Options
+```bash
+readme-cinema --color neon --progress --speed 20
+readme-cinema --color matrix --transitions
+readme-cinema --color rainbow --progress
+```
 
-When you run `readme-cinema`, here's the cinematic experience:
+## ⚙️ Options
 
-1. **🎨 Dramatic ASCII Banner** - Your project name appears in large ASCII art with glitch effects
-2. **⌨️ Typewriter Effect** - Text types out character by character like a hacker scene
-3. **🎭 Scene Transitions** - "SCENE TRANSITION" appears between major sections
-4. **🌈 Syntax Highlighting** - Code blocks glow with language-specific colors
-5. **📊 Progress Bars** - Features show animated progress: `██████████░░ 80%`
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--speed <ms>` | Typewriter speed in milliseconds | `50` |
+| `--color <theme>` | Color theme | `hacker` |
+| `--progress` | Show progress bars for features | `false` |
+| `--transitions` | Enable section transitions | `true` |
 
-### 🎬 Live Demo
+## 🎨 Color Themes
 
-**Watch the magic happen!** Here's what you'll see when you run `readme-cinema`:
+| Theme | Colors | Style |
+|-------|--------|-------|
+| **Hacker** | Green/Cyan | Cybersecurity vibes |
+| **Neon** | Magenta/Cyan | Cyberpunk aesthetic |
+| **Classic** | Blue/White | Professional |
+| **Matrix** | All Green | Matrix-style |
+| **Cyberpunk** | Magenta/Cyan | Futuristic |
+| **Retro** | Yellow/Cyan | Vintage terminal |
+| **Dark** | White/Gray | Minimalist |
+| **Rainbow** | Multiple | Fun & vibrant |
+
+## 🎬 Example Output
 
 ```
 ██████╗ ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗
@@ -102,142 +86,24 @@ Welcome to my project! This text will type out character by character...
 • Easy Integration ████████░░░░ 70%
 ```
 
-**🎬 Try it yourself:**
-```bash
-# Install and run
-npm install -g readme-cinema
-readme-cinema --color neon --progress
-
-# Or clone and run locally
-git clone https://github.com/beingmartinbmc/readme-cinema.git
-cd readme-cinema
-npm install
-node quick-demo.js
-```
-
-**📱 Share your cinematic README:**
-- Record your terminal with `readme-cinema` in action
-- Share on Twitter, LinkedIn, or YouTube
-- Tag us: `#readmecinema` `#terminalart` `#cli`
-
-### 🎬 Demo Preview
-
-Here's what the `quick-demo.js` shows you:
-
-**Theme 1: Hacker (Green)**
-```
-██████╗ ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗
-██╔══██╗██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-██████╔╝█████╗  ███████║██║  ██║██╔████╔██║█████╗
-██╔══██╗██╔══╝  ██╔══██║██║  ██║██║╚██╔╝██║██╔══╝
-██║  ██║███████╗██║  ██║██████╔╝██║ ╚═╝ ██║███████╗
-╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚══════╝
-
-# 🚀 My Awesome Project
-
-Welcome to my project! This text will type out character by character...
-
-                                              SCENE TRANSITION
-
-## ✨ Features
-
-• Lightning Fast ██████████░░ 90%
-• Cross Platform █████████░░░ 80%
-• Easy Integration ████████░░░░ 70%
-```
-
-**Theme 2: Neon (Magenta/Cyan)**
-```
-[Same content with magenta/cyan colors and neon glow effects]
-```
-
-**Theme 3: Cyberpunk (Futuristic)**
-```
-[Same content with cyberpunk styling and effects]
-```
-
-## 📦 Installation
-
-```bash
-npm install -g readme-cinema
-```
-
-## 🎮 Usage
-
-### Basic Usage
-```bash
-readme-cinema
-```
-
-### With Custom File
-```bash
-readme-cinema ./path/to/your/readme.md
-```
-
-### With Options
-```bash
-readme-cinema --speed 30 --color neon --progress
-```
-
-## ⚙️ Options
-
-- `--speed <ms>` - Typewriter speed in milliseconds (default: 50)
-- `--color <theme>` - Color theme: hacker, neon, classic, matrix, cyberpunk, retro, dark, rainbow (default: hacker)
-- `--progress` - Show progress bars for features
-- `--transitions` - Enable dramatic section transitions (default: true)
-
-## 🎨 Color Themes
-
-### Hacker (Default)
-- Green and cyan color scheme
-- Perfect for cybersecurity and tech projects
-
-### Neon
-- Magenta and cyan colors
-- Cyberpunk aesthetic
-
-### Classic
-- Blue and white theme
-- Professional and clean
-
-### Matrix
-- All green theme
-- Matrix-style experience
-
-### Cyberpunk
-- Magenta and cyan
-- Futuristic vibe
-
-### Retro
-- Yellow and cyan
-- Vintage terminal feel
-
-### Dark
-- White and gray
-- Minimalist approach
-
-### Rainbow
-- Multiple colors
-- Fun and vibrant
-
 ## 💡 Examples
-
-### Basic README Display
-```bash
-readme-cinema README.md
-```
 
 ### Fast Typing with Neon Theme
 ```bash
-readme-cinema --speed 20 --color neon
+readme-cinema --speed 20 --color neon --progress
 ```
 
-### With Progress Bars
+### Matrix Hacker Style
 ```bash
-readme-cinema --progress --color cyberpunk
+readme-cinema --color matrix --transitions
 ```
 
-## 🔧 Code Example
+### Rainbow Explosion
+```bash
+readme-cinema --color rainbow --progress
+```
+
+## 🔧 Programmatic Usage
 
 ```javascript
 import { readmeCinema } from 'readme-cinema';
@@ -250,159 +116,40 @@ await readmeCinema('./README.md', {
 });
 ```
 
-## 🎬 Create Your Own Cinematic Experience
+## 📱 Share Your Creation
 
-**Ready to make your README legendary?** Here are some creative ideas:
-
-### 🎭 Theme Combinations
-```bash
-# Cyberpunk vibes
-readme-cinema --color neon --progress --speed 30
-
-# Matrix hacker style
-readme-cinema --color matrix --transitions
-
-# Rainbow explosion
-readme-cinema --color rainbow --progress
-```
-
-### 📹 Recording Tips
-- Use **OBS Studio** or **Loom** to record your terminal
-- Set terminal background to black for best contrast
-- Use a monospace font like **Fira Code** or **JetBrains Mono**
-- Record in **1080p** for crisp ASCII art
-
-### 🚀 Pro Tips
-- **Speed variations**: Use `--speed 20` for dramatic reveals, `--speed 100` for casual reading
-- **Progress bars**: Enable `--progress` to show feature completion percentages
-- **Custom files**: Point to any markdown file: `readme-cinema ./docs/getting-started.md`
-- **Theme matching**: Match your theme to your project's brand colors
-
-### 📱 Share Your Creation
-Tag us on social media with your cinematic README videos:
+Record your cinematic README and share it:
 - **Twitter**: `#readmecinema` `#terminalart`
 - **LinkedIn**: Show off your documentation skills
-- **YouTube**: Create tutorials or showcase videos
 - **GitHub**: Add a demo GIF to your project README
 
-### 🎬 Creating Demo GIFs for GitHub
+### Creating Demo GIFs
+```bash
+# Record terminal session
+asciinema rec demo.cast
 
-Want to add a cinematic demo to your project's README?
+# Convert to GIF
+asciinema-gif demo.cast demo.gif
 
-1. **Record your terminal:**
-   ```bash
-   # Use terminal recording tools
-   asciinema rec demo.cast
-   # or
-   ttyrec demo.rec
-   ```
+# Add to README
+![Demo](demo.gif)
+```
 
-2. **Convert to GIF:**
-   ```bash
-   # Convert asciinema to GIF
-   asciinema-gif demo.cast demo.gif
-   ```
+## 🤝 Contributing
 
-3. **Add to your README:**
-   ```markdown
-   # My Project
-   
-   ![Demo](demo.gif)
-   
-   Transform your README with cinematic effects!
-   ```
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Contributing
+## 📄 License
 
-We welcome contributions from the community! Here's how you can help improve README Cinema:
+MIT License - see [LICENSE](LICENSE) for details.
 
-### 🚀 Getting Started
-
-1. **Fork the repository**
-   - Go to [https://github.com/beingmartinbmc/readme-cinema](https://github.com/beingmartinbmc/readme-cinema)
-   - Click the "Fork" button in the top right
-   - Clone your forked repository:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/readme-cinema.git
-   cd readme-cinema
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Create your feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-
-### 🛠️ Development
-
-- **Run the CLI locally**: `node bin/cli.js README.md`
-- **Test different themes**: `node bin/cli.js --color neon --progress`
-- **Run the demo**: `node demo.js`
-
-### 📝 Making Changes
-
-1. **Make your changes** - Add new features, fix bugs, or improve documentation
-2. **Test your changes** - Ensure everything works as expected
-3. **Commit your changes**
-   ```bash
-   git commit -m 'feat: add new transition effect'
-   git commit -m 'fix: resolve syntax highlighting issue'
-   git commit -m 'docs: update installation instructions'
-   ```
-4. **Push to your branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request** with a clear description of your changes
-
-### 🎯 Areas for Contribution
-
-- **New Color Themes** - Add more visual themes
-- **Transition Effects** - Create new cinematic transitions
-- **Progress Bar Styles** - Design new progress animations
-- **Syntax Highlighting** - Support for more programming languages
-- **Performance Improvements** - Optimize typing speed and effects
-- **Documentation** - Improve README, add examples, or create tutorials
-- **Bug Fixes** - Report and fix issues
-
-### 📋 Pull Request Guidelines
-
-- **Clear title** describing the change
-- **Detailed description** of what was changed and why
-- **Test coverage** for new features
-- **Documentation updates** if needed
-- **Follow existing code style** and conventions
-
-### 🐛 Reporting Issues
-
-Found a bug or have a feature request? Please [open an issue](https://github.com/beingmartinbmc/readme-cinema/issues) with:
-
-- **Clear description** of the problem
-- **Steps to reproduce** the issue
-- **Expected vs actual behavior**
-- **Environment details** (OS, Node.js version, etc.)
-
-### 📄 Code of Conduct
-
-This project is open to everyone. Please be respectful and inclusive in all interactions.
-
-## Author
+## 👨‍💻 Author
 
 **Ankit Sharma** - [ankit.sharma199803@gmail.com](mailto:ankit.sharma199803@gmail.com)
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with [chalk](https://github.com/chalk/chalk) for colors
-- ASCII art powered by [figlet](https://github.com/patorjk/figlet.js)
-- Markdown parsing with [marked](https://github.com/markedjs/marked)
 
 ---
 
