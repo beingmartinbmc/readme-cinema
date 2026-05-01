@@ -1,156 +1,134 @@
-# README Cinema 🎬
+# README Cinema
 
-Transform your README files into cinematic terminal experiences with ASCII art, typewriter effects, and dramatic transitions.
+Transform a Markdown README into a cinematic terminal presentation with ASCII art, typewriter text, syntax-colored code blocks, scene transitions, and optional feature progress bars.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install globally
 npm install -g readme-cinema
-
-# Run on your README
 readme-cinema
-
-# Or with options
-readme-cinema --color neon --progress --speed 30
 ```
 
-## ✨ Features
+Run it against any Markdown file:
 
-- **🎨 ASCII Banner** - Dramatic ASCII art titles with glitch effects
-- **⌨️ Typewriter Effect** - Text types out character by character
-- **🎭 Scene Transitions** - Movie-like transitions between sections
-- **🌈 Syntax Highlighting** - Color-coded code blocks
-- **📊 Progress Bars** - Animated progress for features
-- **🎨 8 Color Themes** - Hacker, Neon, Classic, Matrix, Cyberpunk, Retro, Dark, Rainbow
-
-## 🎮 Usage
-
-### Basic Usage
 ```bash
-readme-cinema                    # Uses default README.md
-readme-cinema ./path/to/file.md  # Custom file
+readme-cinema ./docs/intro.md --color neon --progress --speed 30
 ```
 
-### With Options
+Use `--instant` when you want a fast preview without animation delays:
+
 ```bash
-readme-cinema --color neon --progress --speed 20
-readme-cinema --color matrix --transitions
-readme-cinema --color rainbow --progress
+readme-cinema README.md --instant --no-clear
 ```
-
-## ⚙️ Options
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--speed <ms>` | Typewriter speed in milliseconds | `50` |
-| `--color <theme>` | Color theme | `hacker` |
-| `--progress` | Show progress bars for features | `false` |
-| `--transitions` | Enable section transitions | `true` |
-
-## 🎨 Color Themes
-
-| Theme | Colors | Style |
-|-------|--------|-------|
-| **Hacker** | Green/Cyan | Cybersecurity vibes |
-| **Neon** | Magenta/Cyan | Cyberpunk aesthetic |
-| **Classic** | Blue/White | Professional |
-| **Matrix** | All Green | Matrix-style |
-| **Cyberpunk** | Magenta/Cyan | Futuristic |
-| **Retro** | Yellow/Cyan | Vintage terminal |
-| **Dark** | White/Gray | Minimalist |
-| **Rainbow** | Multiple | Fun & vibrant |
-
-## 🎬 Example Output
-
-```
-██████╗ ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗
-██╔══██╗██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-██████╔╝█████╗  ███████║██║  ██║██╔████╔██║█████╗
-██╔══██╗██╔══╝  ██╔══██║██║  ██║██║╚██╔╝██║██╔══╝
-██║  ██║███████╗██║  ██║██████╔╝██║ ╚═╝ ██║███████╗
-╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝╚══════╝
-
-Transform your docs into cinematic experiences
-
-# My Awesome Project
-
-Welcome to my project! This text will type out character by character...
-
-                                              SCENE TRANSITION
 
 ## Features
 
-• Lightning Fast ██████████░░ 90%
-• Cross Platform █████████░░░ 80%
-• Easy Integration ████████░░░░ 70%
-```
+- Cinematic ASCII title banner with a glitch reveal.
+- Typewriter rendering with natural punctuation, space, number, and capitalization pacing.
+- Scene transitions between major Markdown sections.
+- Syntax-colored fenced code blocks for JavaScript, TypeScript, Python, HTML, CSS, JSON, YAML, Bash, and more.
+- Deterministic progress bars for feature-like list items.
+- Eight terminal themes: `hacker`, `neon`, `classic`, `matrix`, `cyberpunk`, `retro`, `dark`, and `rainbow`.
+- Testable programmatic API with injectable output, sleep, and randomness for deterministic automation.
 
-## 💡 Examples
+## CLI
 
-### Fast Typing with Neon Theme
 ```bash
-readme-cinema --speed 20 --color neon --progress
+readme-cinema [file] [options]
 ```
 
-### Matrix Hacker Style
+`file` defaults to `./README.md`.
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `-s, --speed <ms>` | Typewriter speed in milliseconds. Must be a non-negative integer. | `50` |
+| `-c, --color <theme>` | Theme name. Run `--list-themes` to see valid values. | `hacker` |
+| `-p, --progress` | Add progress bars to feature-like list items. | `false` |
+| `-t, --transitions` | Enable scene transitions. | `true` |
+| `--no-transitions` | Disable scene transitions. | |
+| `--banner` / `--no-banner` | Show or skip the ASCII banner. | `true` |
+| `--clear` / `--no-clear` | Clear or preserve the terminal before rendering. | `true` |
+| `--instant` | Skip animation delays for previews and automation. | `false` |
+| `--list-themes` | Print available themes and exit. | |
+
+## Examples
+
 ```bash
-readme-cinema --color matrix --transitions
+# Cyberpunk-style preview
+readme-cinema README.md --color neon --progress --instant
+
+# Matrix mode with full cinematic timing
+readme-cinema README.md --color matrix --transitions
+
+# Quiet preview that keeps existing terminal output visible
+readme-cinema README.md --instant --no-banner --no-clear --no-transitions
 ```
 
-### Rainbow Explosion
-```bash
-readme-cinema --color rainbow --progress
-```
-
-## 🔧 Programmatic Usage
+## Programmatic Usage
 
 ```javascript
-import { readmeCinema } from 'readme-cinema';
+import { readmeCinema, getAvailableThemes } from 'readme-cinema';
 
-await readmeCinema('./README.md', {
-  speed: 50,
+console.log(getAvailableThemes());
+
+const summary = await readmeCinema('./README.md', {
+  speed: 30,
   color: 'hacker',
   progress: true,
-  transitions: true
+  transitions: true,
+  instant: false
+});
+
+console.log(summary);
+```
+
+`readmeCinema()` resolves with a small summary:
+
+```javascript
+{
+  filePath: './README.md',
+  theme: 'hacker',
+  tokensProcessed: 12
+}
+```
+
+For tests or custom renderers, pass an output adapter:
+
+```javascript
+await readmeCinema('./README.md', {
+  instant: true,
+  output: {
+    write: (text) => process.stdout.write(text),
+    log: (...args) => console.log(...args),
+    error: (...args) => console.error(...args),
+    clear: () => {}
+  }
 });
 ```
 
-## 📱 Share Your Creation
+## Development
 
-Record your cinematic README and share it:
-- **Twitter**: `#readmecinema` `#terminalart`
-- **LinkedIn**: Show off your documentation skills
-- **GitHub**: Add a demo GIF to your project README
-
-### Creating Demo GIFs
 ```bash
-# Record terminal session
-asciinema rec demo.cast
-
-# Convert to GIF
-asciinema-gif demo.cast demo.gif
-
-# Add to README
-![Demo](demo.gif)
+npm ci
+npm run lint
+npm run test:ci
+npm run build
 ```
 
-## 🤝 Contributing
+The Jest configuration enforces at least 90% global coverage for statements, branches, functions, and lines. The current suite is deterministic and runs the animation code in instant mode.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Release
 
-## 📄 License
+1. Make changes on a feature branch.
+2. Run `npm run lint`, `npm run test:ci`, `npm run build`, and `npm audit --audit-level=moderate`.
+3. Update `package.json` with the next version.
+4. Tag the release as `vX.Y.Z`.
+5. Publish to npm and create GitHub release notes from the tag.
 
-MIT License - see [LICENSE](LICENSE) for details.
+## License
 
-## 👨‍💻 Author
+MIT License. See [LICENSE](LICENSE) for details.
 
-**Ankit Sharma** - [ankit.sharma199803@gmail.com](mailto:ankit.sharma199803@gmail.com)
+## Author
 
----
-
-Made with ❤️ for the terminal community
+Ankit Sharma - [ankit.sharma199803@gmail.com](mailto:ankit.sharma199803@gmail.com)

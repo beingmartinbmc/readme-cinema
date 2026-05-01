@@ -1,14 +1,15 @@
-import chalk from 'chalk';
+import { colorize, createRuntime, normalizeSpeed } from './runtime.js';
 
 export class TypewriterEffect {
-  constructor(speed = 50, theme) {
-    this.speed = parseInt(speed);
+  constructor(speed = 50, theme, runtimeOptions = {}) {
+    this.speed = normalizeSpeed(speed);
     this.theme = theme;
     this.currentLine = '';
+    this.runtime = createRuntime(runtimeOptions);
   }
 
   async type(text, color = 'white') {
-    const chars = text.split('');
+    const chars = String(text).split('');
     
     for (let i = 0; i < chars.length; i++) {
       const char = chars[i];
@@ -18,25 +19,25 @@ export class TypewriterEffect {
       
       // Handle special characters
       if (char === '\n') {
-        console.log();
+        this.runtime.output.log();
         this.currentLine = '';
         continue;
       }
       
       // Display the character with color
-      process.stdout.write(chalk[color](char));
+      this.runtime.output.write(colorize(color, char));
       
       // Add realistic typing delays
       await this.getTypingDelay(char);
       
       // Occasionally add "thinking" pauses
-      if (Math.random() < 0.02) {
+      if (this.runtime.random() < 0.02) {
         await this.sleep(this.speed * 3);
       }
     }
   }
 
-  async getTypingDelay(char) {
+  calculateTypingDelay(char) {
     let delay = this.speed;
     
     // Vary typing speed based on character type
@@ -53,23 +54,29 @@ export class TypewriterEffect {
     }
     
     // Add some randomness for more natural typing
-    delay += Math.random() * this.speed * 0.3;
+    delay += this.runtime.random() * this.speed * 0.3;
     
+    return delay;
+  }
+
+  async getTypingDelay(char) {
+    const delay = this.calculateTypingDelay(char);
     await this.sleep(delay);
+    return delay;
   }
 
   async typeWithCursor(text, color = 'white') {
-    const chars = text.split('');
+    const chars = String(text).split('');
     
     for (let i = 0; i < chars.length; i++) {
       const char = chars[i];
       
       // Show cursor effect
-      process.stdout.write(chalk[color](char) + chalk.cyan('|'));
+      this.runtime.output.write(colorize(color, char) + colorize('cyan', '|'));
       await this.sleep(this.speed);
       
       // Remove cursor
-      process.stdout.write('\b');
+      this.runtime.output.write('\b');
       
       // Add character to current line
       this.currentLine += char;
@@ -77,7 +84,7 @@ export class TypewriterEffect {
   }
 
   async typeWithHackerEffect(text, color = 'white') {
-    const chars = text.split('');
+    const chars = String(text).split('');
     const hackerChars = ['0', '1', '█', '▓', '▒', '░', '▄', '▀'];
     
     for (let i = 0; i < chars.length; i++) {
@@ -85,14 +92,14 @@ export class TypewriterEffect {
       
       // Show random characters first (hacker effect)
       for (let j = 0; j < 3; j++) {
-        const randomChar = hackerChars[Math.floor(Math.random() * hackerChars.length)];
-        process.stdout.write(chalk[color](randomChar));
+        const randomChar = hackerChars[Math.floor(this.runtime.random() * hackerChars.length)];
+        this.runtime.output.write(colorize(color, randomChar));
         await this.sleep(30);
-        process.stdout.write('\b');
+        this.runtime.output.write('\b');
       }
       
       // Show the actual character
-      process.stdout.write(chalk[color](char));
+      this.runtime.output.write(colorize(color, char));
       this.currentLine += char;
       
       await this.sleep(this.speed);
@@ -100,21 +107,21 @@ export class TypewriterEffect {
   }
 
   async typeWithGlitch(text, color = 'white') {
-    const chars = text.split('');
+    const chars = String(text).split('');
     
     for (let i = 0; i < chars.length; i++) {
       const char = chars[i];
       
       // Occasionally glitch the character
-      if (Math.random() < 0.1) {
-        const glitchChar = String.fromCharCode(0x2588 + Math.floor(Math.random() * 8));
-        process.stdout.write(chalk[color](glitchChar));
+      if (this.runtime.random() < 0.1) {
+        const glitchChar = String.fromCharCode(0x2588 + Math.floor(this.runtime.random() * 8));
+        this.runtime.output.write(colorize(color, glitchChar));
         await this.sleep(50);
-        process.stdout.write('\b');
+        this.runtime.output.write('\b');
       }
       
       // Show the actual character
-      process.stdout.write(chalk[color](char));
+      this.runtime.output.write(colorize(color, char));
       this.currentLine += char;
       
       await this.sleep(this.speed);
@@ -122,6 +129,6 @@ export class TypewriterEffect {
   }
 
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return this.runtime.sleep(ms);
   }
 }

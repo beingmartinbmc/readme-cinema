@@ -1,14 +1,17 @@
 export default {
   testEnvironment: 'node',
   collectCoverage: true,
+  collectCoverageFrom: [
+    'src/**/*.js'
+  ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
     global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90
     }
   },
   testMatch: [
@@ -19,10 +22,5 @@ export default {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
   }
 };

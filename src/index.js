@@ -6,18 +6,44 @@ import { SectionTransitions } from './section-transitions.js';
 import { SyntaxHighlighter } from './syntax-highlighter.js';
 import { ProgressBars } from './progress-bars.js';
 import { ColorThemes } from './color-themes.js';
+import { createRuntime } from './runtime.js';
+
+export function getAvailableThemes() {
+  return Object.keys(ColorThemes);
+}
+
+export function resolveTheme(color = 'hacker') {
+  const themeName = getAvailableThemes().includes(color) ? color : 'hacker';
+  return {
+    name: themeName,
+    theme: ColorThemes[themeName]
+  };
+}
 
 export async function readmeCinema(filePath, options = {}) {
+  const config = options ?? {};
   const {
     speed = 50,
     color = 'hacker',
     progress = false,
-    transitions = true
-  } = options;
+    transitions = true,
+    banner: showBanner = true,
+    clearScreen = true,
+    completionMessage = true,
+    instant = false,
+    output,
+    random,
+    sleep
+  } = config;
 
-  // Set up color theme
-  const theme = ColorThemes[color] || ColorThemes.hacker;
-  
+  if (!filePath) {
+    throw new Error('Failed to process README: file path is required');
+  }
+
+  const { name: themeName, theme } = resolveTheme(color);
+  const runtimeOptions = { output, random, sleep, instant };
+  const runtime = createRuntime(runtimeOptions);
+
   try {
     // Read the README file
     const content = await fs.readFile(filePath, 'utf-8');
@@ -26,17 +52,21 @@ export async function readmeCinema(filePath, options = {}) {
     const tokens = marked.lexer(content);
     
     // Initialize components
-    const banner = new AsciiBanner(theme);
-    const typewriter = new TypewriterEffect(speed, theme);
-    const transitionsManager = new SectionTransitions(theme);
+    const banner = new AsciiBanner(theme, runtimeOptions);
+    const typewriter = new TypewriterEffect(speed, theme, runtimeOptions);
+    const transitionsManager = new SectionTransitions(theme, runtimeOptions);
     const highlighter = new SyntaxHighlighter(theme);
-    const progressBars = new ProgressBars(theme);
+    const progressBars = new ProgressBars(theme, runtimeOptions);
     
     // Start the cinematic experience
-    console.clear();
+    if (clearScreen && typeof runtime.output.clear === 'function') {
+      runtime.output.clear();
+    }
     
     // 1. ASCII Banner
-    await banner.display();
+    if (showBanner) {
+      await banner.display();
+    }
     
     // 2. Process each section
     for (let i = 0; i < tokens.length; i++) {
@@ -73,14 +103,22 @@ export async function readmeCinema(filePath, options = {}) {
     }
     
     // Final flourish
-    await typewriter.type('\n\n🎬 README Cinema Complete! 🎬\n', theme.accent);
+    if (completionMessage) {
+      await typewriter.type('\n\n🎬 README Cinema Complete! 🎬\n', theme.accent);
+    }
+
+    return {
+      filePath,
+      theme: themeName,
+      tokensProcessed: tokens.length
+    };
     
   } catch (error) {
     throw new Error(`Failed to process README: ${error.message}`);
   }
 }
 
-function isMajorSection(currentToken, previousToken) {
+export function isMajorSection(currentToken, previousToken) {
   return currentToken.type === 'heading' && 
          currentToken.depth <= 2 && 
          previousToken.type !== 'heading';
@@ -136,16 +174,38 @@ async function processBlockquote(token, typewriter, theme) {
   await typewriter.type('\n\n', theme.text);
 }
 
-function isFeatureItem(text) {
-  const featureKeywords = ['feature', 'capability', 'functionality', 'support', 'integration'];
+export function isFeatureItem(text) {
+  const featureKeywords = [
+    'feature',
+    'capability',
+    'functionality',
+    'support',
+    'integration',
+    'fast',
+    'platform',
+    'analytics',
+    'customizable',
+    'real-time'
+  ];
   return featureKeywords.some(keyword => 
     text.toLowerCase().includes(keyword)
   );
 }
 
+export function getFeatureProgress(text) {
+  const source = String(text);
+  let hash = 0;
+
+  for (let i = 0; i < source.length; i++) {
+    hash = (hash * 31 + source.charCodeAt(i)) % 41;
+  }
+
+  return 60 + hash;
+}
+
 async function processFeatureWithProgress(item, typewriter, theme, progressBars) {
   const featureName = item.text;
-  const progress = Math.floor(Math.random() * 40) + 60; // 60-100%
+  const progress = getFeatureProgress(featureName);
   
   await typewriter.type(featureName, theme.text);
   await typewriter.type(' ', theme.text);

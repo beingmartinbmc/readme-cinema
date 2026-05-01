@@ -1,29 +1,40 @@
-import chalk from 'chalk';
+import { clampPercentage, colorize, createRuntime } from './runtime.js';
 
 export class ProgressBars {
-  constructor(theme) {
+  constructor(theme, runtimeOptions = {}) {
     this.theme = theme;
     this.barLength = 20;
+    this.runtime = createRuntime(runtimeOptions);
   }
 
   async showProgress(label, percentage) {
     // Clamp percentage to 0-100 range
-    const clampedPercentage = Math.max(0, Math.min(100, percentage));
-    const filledLength = Math.floor((clampedPercentage / 100) * this.barLength);
-    const emptyLength = Math.max(0, this.barLength - filledLength);
-    
-    const filledBar = '█'.repeat(filledLength);
-    const emptyBar = '░'.repeat(emptyLength);
+    const clampedPercentage = clampPercentage(percentage);
+    const { filledBar, emptyBar } = this.getProgressParts(clampedPercentage);
     
     // Animate the progress bar
     await this.animateProgress(label, filledBar, emptyBar, clampedPercentage);
   }
 
-  async animateProgress(label, filledBar, emptyBar, percentage) {
+  getProgressParts(percentage) {
+    const clampedPercentage = clampPercentage(percentage);
+    const filledLength = Math.floor((clampedPercentage / 100) * this.barLength);
+    const emptyLength = Math.max(0, this.barLength - filledLength);
+
+    return {
+      filledLength,
+      emptyLength,
+      filledBar: '█'.repeat(filledLength),
+      emptyBar: '░'.repeat(emptyLength)
+    };
+  }
+
+  async animateProgress(label, _filledBar, _emptyBar, percentage) {
     const frames = 10;
+    const targetPercentage = clampPercentage(percentage);
     
     for (let i = 0; i <= frames; i++) {
-      const progress = (i / frames) * percentage;
+      const progress = (i / frames) * targetPercentage;
       const currentFilled = Math.floor((progress / 100) * this.barLength);
       const currentEmpty = this.barLength - currentFilled;
       
@@ -31,73 +42,74 @@ export class ProgressBars {
       const currentEmptyBar = '░'.repeat(currentEmpty);
       
       // Clear the line and show progress
-      process.stdout.write(`\r${chalk[this.theme.progress](currentFilledBar)}${chalk.gray(currentEmptyBar)} ${chalk[this.theme.progress](`${Math.floor(progress)}%`)}`);
+      this.runtime.output.write(`\r${colorize(this.theme.progress, currentFilledBar)}${colorize('gray', currentEmptyBar)} ${colorize(this.theme.progress, `${Math.floor(progress)}%`)}`);
       
       await this.sleep(50);
     }
     
     // Show final result
-    console.log(` ${chalk[this.theme.accent](label)}`);
+    this.runtime.output.log(` ${colorize(this.theme.accent, label)}`);
   }
 
   async showFeatureProgress(features) {
-    console.log('\n');
+    this.runtime.output.log('\n');
     
     for (const feature of features) {
-      const percentage = feature.percentage || Math.floor(Math.random() * 40) + 60;
+      const percentage = feature.percentage ?? Math.floor(this.runtime.random() * 40) + 60;
       await this.showProgress(feature.name, percentage);
       await this.sleep(200);
     }
     
-    console.log('\n');
+    this.runtime.output.log('\n');
   }
 
   async showLoadingSpinner(text, duration = 2000) {
     const spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-    const startTime = Date.now();
     let i = 0;
+
+    this.runtime.output.write(`\r${colorize(this.theme.accent, spinner[i])} ${text}`);
     
     const interval = setInterval(() => {
-      process.stdout.write(`\r${chalk[this.theme.accent](spinner[i])} ${text}`);
       i = (i + 1) % spinner.length;
+      this.runtime.output.write(`\r${colorize(this.theme.accent, spinner[i])} ${text}`);
     }, 100);
     
     await this.sleep(duration);
     clearInterval(interval);
     
     // Clear the spinner
-    process.stdout.write('\r' + ' '.repeat(text.length + 2) + '\r');
+    this.runtime.output.write('\r' + ' '.repeat(text.length + 2) + '\r');
   }
 
   async showMatrixProgress(label, percentage) {
     const matrixChars = ['0', '1', '█', '▓', '▒', '░'];
-    const filledLength = Math.floor((percentage / 100) * this.barLength);
+    const targetPercentage = clampPercentage(percentage);
+    const filledLength = this.getProgressParts(targetPercentage).filledLength;
     
     for (let i = 0; i <= filledLength; i++) {
       let bar = '';
       
       for (let j = 0; j < this.barLength; j++) {
         if (j < i) {
-          bar += chalk[this.theme.progress]('█');
+          bar += colorize(this.theme.progress, '█');
         } else if (j === i) {
           // Animate the current position with matrix characters
-          const matrixChar = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-          bar += chalk[this.theme.accent](matrixChar);
+          const matrixChar = matrixChars[Math.floor(this.runtime.random() * matrixChars.length)];
+          bar += colorize(this.theme.accent, matrixChar);
         } else {
-          bar += chalk.gray('░');
+          bar += colorize('gray', '░');
         }
       }
       
-      process.stdout.write(`\r${bar} ${chalk[this.theme.progress](`${Math.floor((i / this.barLength) * 100)}%`)}`);
+      this.runtime.output.write(`\r${bar} ${colorize(this.theme.progress, `${Math.floor((i / this.barLength) * 100)}%`)}`);
       await this.sleep(100);
     }
     
-    console.log(` ${chalk[this.theme.accent](label)}`);
+    this.runtime.output.log(` ${colorize(this.theme.accent, label)}`);
   }
 
   async showGlitchProgress(label, percentage) {
-    const filledLength = Math.floor((percentage / 100) * this.barLength);
-    const emptyLength = this.barLength - filledLength;
+    const filledLength = this.getProgressParts(percentage).filledLength;
     
     // Show glitch effect during progress
     for (let i = 0; i <= filledLength; i++) {
@@ -106,44 +118,41 @@ export class ProgressBars {
       for (let j = 0; j < this.barLength; j++) {
         if (j < i) {
           // Occasionally glitch filled parts
-          if (Math.random() < 0.1) {
-            bar += chalk[this.theme.accent]('█');
+          if (this.runtime.random() < 0.1) {
+            bar += colorize(this.theme.accent, '█');
           } else {
-            bar += chalk[this.theme.progress]('█');
+            bar += colorize(this.theme.progress, '█');
           }
         } else if (j === i) {
-          bar += chalk[this.theme.accent]('█');
+          bar += colorize(this.theme.accent, '█');
         } else {
-          bar += chalk.gray('░');
+          bar += colorize('gray', '░');
         }
       }
       
-      process.stdout.write(`\r${bar} ${chalk[this.theme.progress](`${Math.floor((i / this.barLength) * 100)}%`)}`);
+      this.runtime.output.write(`\r${bar} ${colorize(this.theme.progress, `${Math.floor((i / this.barLength) * 100)}%`)}`);
       await this.sleep(80);
     }
     
-    console.log(` ${chalk[this.theme.accent](label)}`);
+    this.runtime.output.log(` ${colorize(this.theme.accent, label)}`);
   }
 
   async showNeonProgress(label, percentage) {
-    const filledLength = Math.floor((percentage / 100) * this.barLength);
-    const emptyLength = this.barLength - filledLength;
-    
-    const filledBar = '█'.repeat(filledLength);
-    const emptyBar = '░'.repeat(emptyLength);
+    const targetPercentage = clampPercentage(percentage);
+    const { filledBar, emptyBar } = this.getProgressParts(targetPercentage);
     
     // Neon glow effect
     for (let i = 0; i < 3; i++) {
-      process.stdout.write(`\r${chalk[this.theme.progress](filledBar)}${chalk.gray(emptyBar)} ${chalk[this.theme.progress](`${percentage}%`)}`);
+      this.runtime.output.write(`\r${colorize(this.theme.progress, filledBar)}${colorize('gray', emptyBar)} ${colorize(this.theme.progress, `${targetPercentage}%`)}`);
       await this.sleep(200);
-      process.stdout.write(`\r${chalk[this.theme.accent](filledBar)}${chalk.gray(emptyBar)} ${chalk[this.theme.accent](`${percentage}%`)}`);
+      this.runtime.output.write(`\r${colorize(this.theme.accent, filledBar)}${colorize('gray', emptyBar)} ${colorize(this.theme.accent, `${targetPercentage}%`)}`);
       await this.sleep(200);
     }
     
-    console.log(` ${chalk[this.theme.accent](label)}`);
+    this.runtime.output.log(` ${colorize(this.theme.accent, label)}`);
   }
 
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return this.runtime.sleep(ms);
   }
 }

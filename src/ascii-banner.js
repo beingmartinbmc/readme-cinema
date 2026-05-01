@@ -1,9 +1,10 @@
 import figlet from 'figlet';
-import chalk from 'chalk';
+import { colorize, createRuntime } from './runtime.js';
 
 export class AsciiBanner {
-  constructor(theme) {
+  constructor(theme, runtimeOptions = {}) {
     this.theme = theme;
+    this.runtime = createRuntime(runtimeOptions);
   }
 
   async display() {
@@ -26,17 +27,17 @@ export class AsciiBanner {
       if (line.trim()) {
         // Add glitch effect for dramatic impact
         await this.glitchEffect(line, this.theme.banner);
-        console.log(chalk[this.theme.banner](line));
+        this.runtime.output.log(colorize(this.theme.banner, line));
         await this.sleep(100);
       } else {
-        console.log('');
+        this.runtime.output.log('');
       }
     }
     
     // Add subtitle with typewriter effect
-    console.log('\n');
+    this.runtime.output.log('\n');
     await this.typewriterSubtitle(subtitle);
-    console.log('\n');
+    this.runtime.output.log('\n');
     
     // Add dramatic pause
     await this.sleep(1000);
@@ -49,29 +50,29 @@ export class AsciiBanner {
     
     for (let i = 0; i < 3; i++) {
       const glitched = originalText.split('').map(char => 
-        char === ' ' ? ' ' : glitchChars[Math.floor(Math.random() * glitchChars.length)]
+        char === ' ' ? ' ' : glitchChars[Math.floor(this.runtime.random() * glitchChars.length)]
       ).join('');
       
-      process.stdout.write(`\r${chalk[color](glitched)}`);
+      this.runtime.output.write(`\r${colorize(color, glitched)}`);
       await this.sleep(50);
     }
     
-    process.stdout.write(`\r${chalk[color](originalText)}`);
+    this.runtime.output.write(`\r${colorize(color, originalText)}`);
   }
 
   async typewriterSubtitle(text) {
     const words = text.split(' ');
     
     for (let i = 0; i < words.length; i++) {
-      process.stdout.write(chalk[this.theme.subtitle](words[i]));
+      this.runtime.output.write(colorize(this.theme.subtitle, words[i]));
       if (i < words.length - 1) {
-        process.stdout.write(' ');
+        this.runtime.output.write(' ');
       }
       await this.sleep(150);
     }
   }
 
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return this.runtime.sleep(ms);
   }
 }

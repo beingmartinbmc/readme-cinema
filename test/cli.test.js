@@ -1,130 +1,165 @@
+import fs from 'fs-extra';
 import { jest } from '@jest/globals';
-import { execSync } from 'child_process';
+import os from 'os';
+import path from 'path';
+import { createProgram, parseSpeed, runCli } from '../src/cli.js';
+import { getAvailableThemes } from '../src/index.js';
+import { createMockOutput } from './helpers.js';
 
-describe('CLI', () => {
-  describe('help command', () => {
-    test('should show help information', () => {
-      const output = execSync('node bin/cli.js --help', { encoding: 'utf8' });
-      
-      expect(output).toContain('readme-cinema');
-      expect(output).toContain('Transform your README files');
-      expect(output).toContain('--help');
-      expect(output).toContain('--version');
-      expect(output).toContain('--speed');
-      expect(output).toContain('--color');
-      expect(output).toContain('--progress');
-      expect(output).toContain('--transitions');
-    });
+describe('CLI program', () => {
+  let tempDir;
+  let previousExitCode;
 
-    test('should show all color themes in help', () => {
-      const output = execSync('node bin/cli.js --help', { encoding: 'utf8' });
-      
-      // The actual help text shows themes with line breaks
-      expect(output).toContain('hacker, neon, classic, matrix, cyberpunk, retro, dark, rainbow');
+  beforeEach(async () => {
+    previousExitCode = process.exitCode;
+    process.exitCode = undefined;
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'readme-cinema-cli-'));
+  });
+
+  afterEach(async () => {
+    process.exitCode = previousExitCode;
+    await fs.remove(tempDir);
+  });
+
+  test('passes parsed options to the rendering action', async () => {
+    const filePath = path.join(tempDir, 'README.md');
+    await fs.writeFile(filePath, '# CLI');
+    const action = jest.fn().mockResolvedValue();
+    const { output } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync([
+      'node',
+      'readme-cinema',
+      filePath,
+      '--speed',
+      '0',
+      '--color',
+      'neon',
+      '--progress',
+      '--no-transitions',
+      '--no-banner',
+      '--no-clear',
+      '--instant'
+    ]);
+
+    expect(action).toHaveBeenCalledWith(filePath, {
+      speed: 0,
+      color: 'neon',
+      progress: true,
+      transitions: false,
+      banner: false,
+      clearScreen: false,
+      instant: true
     });
   });
 
-  describe('version command', () => {
-    test('should show version information', () => {
-      const output = execSync('node bin/cli.js --version', { encoding: 'utf8' });
-      
-      expect(output).toContain('1.0.0');
-    });
+  test('lists themes without reading a file', async () => {
+    const action = jest.fn();
+    const { output, logs } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync(['node', 'readme-cinema', '--list-themes']);
+
+    expect(action).not.toHaveBeenCalled();
+    expect(logs.join('\n')).toContain(getAvailableThemes()[0]);
   });
 
-  describe('file validation', () => {
-    test('should validate file exists before processing', () => {
-      // Mock console.error to capture output
-      const originalError = console.error;
-      const mockError = jest.fn();
-      console.error = mockError;
-      
-      // Mock console.log to capture output
-      const originalLog = console.log;
-      const mockLog = jest.fn();
-      console.log = mockLog;
-      
-      try {
-        execSync('node bin/cli.js nonexistent.md', { encoding: 'utf8' });
-      } catch (error) {
-        // Expected to fail
+  test('reports missing files and unknown themes', async () => {
+    const action = jest.fn();
+    const { output, errors, logs } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync(['node', 'readme-cinema', 'missing.md']);
+    expect(errors.join('\n')).toContain("File 'missing.md' not found");
+    expect(logs.join('\n')).toContain('readme-cinema --help');
+    expect(process.exitCode).toBe(1);
+
+    process.exitCode = undefined;
+    await createProgram({ action, output }).parseAsync([
+      'node',
+      'readme-cinema',
+      'README.md',
+      '--color',
+      'unknown'
+    ]);
+    expect(errors.join('\n')).toContain("Unknown color theme 'unknown'");
+    expect(process.exitCode).toBe(1);
+  });
+
+  test('parses speeds as non-negative integers', () => {
+    expect(parseSpeed('0')).toBe(0);
+    expect(parseSpeed('120')).toBe(120);
+    expect(() => parseSpeed('-1')).toThrow('non-negative integer');
+    expect(() => parseSpeed('1.5')).toThrow('non-negative integer');
+    expect(() => parseSpeed('fast')).toThrow('non-negative integer');
+  });
+
+  test('writes help through fallback writer output', async () => {
+    const writes = [];
+    const program = createProgram({
+      action: jest.fn(),
+      output: {
+        write: (text) => writes.push(text)
       }
-      
-      expect(mockError).toHaveBeenCalledWith("❌ Error: File 'nonexistent.md' not found");
-      expect(mockLog).toHaveBeenCalledWith('💡 Try: readme-cinema --help for usage information');
-      
-      // Restore console methods
-      console.error = originalError;
+    });
+
+    program.exitOverride();
+
+    await expect(program.parseAsync(['node', 'readme-cinema', '--help'])).rejects.toMatchObject({
+      code: 'commander.helpDisplayed'
+    });
+    expect(writes.join('')).toContain('Usage: readme-cinema');
+  });
+
+  test('writes command errors through fallback writer output', async () => {
+    const writes = [];
+    const program = createProgram({
+      action: jest.fn(),
+      output: {
+        write: (text) => writes.push(text)
+      }
+    });
+
+    program.exitOverride();
+
+    await expect(program.parseAsync(['node', 'readme-cinema', '--missing-option'])).rejects.toMatchObject({
+      code: 'commander.unknownOption'
+    });
+    expect(writes.join('')).toContain('unknown option');
+  });
+
+  test('handles default program dependencies and silent output objects', async () => {
+    const program = createProgram();
+    expect(program.name()).toBe('readme-cinema');
+
+    const silentProgram = createProgram({
+      action: jest.fn(),
+      output: {}
+    });
+    silentProgram.exitOverride();
+
+    await expect(silentProgram.parseAsync(['node', 'readme-cinema', '--help'])).rejects.toMatchObject({
+      code: 'commander.helpDisplayed'
+    });
+  });
+
+  test('runCli builds and parses a program', async () => {
+    const action = jest.fn();
+    const { output, logs } = createMockOutput();
+
+    await runCli(['node', 'readme-cinema', '--list-themes'], { action, output });
+
+    expect(action).not.toHaveBeenCalled();
+    expect(logs.join('\n')).toContain('hacker');
+  });
+
+  test('runCli supports default dependencies', async () => {
+    const originalLog = console.log;
+    console.log = jest.fn();
+
+    try {
+      await runCli(['node', 'readme-cinema', '--list-themes']);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('hacker'));
+    } finally {
       console.log = originalLog;
-    });
-  });
-
-  describe('argument handling', () => {
-    test('should use default file when no argument provided', () => {
-      // This test will fail if README.md doesn't exist, but that's expected
-      try {
-        execSync('node bin/cli.js', { encoding: 'utf8' });
-      } catch (error) {
-        // Expected to fail if README.md doesn't exist
-        expect(error.message).toContain('File');
-      }
-    });
-
-    test('should use provided file argument', () => {
-      // This test will fail if the file doesn't exist, but that's expected
-      try {
-        execSync('node bin/cli.js custom.md', { encoding: 'utf8' });
-      } catch (error) {
-        // Expected to fail if custom.md doesn't exist
-        expect(error.message).toContain('File');
-      }
-    });
-  });
-
-  describe('option validation', () => {
-    test('should accept valid speed values', () => {
-      // Test various valid speed values
-      expect(() => {
-        execSync('node bin/cli.js test.md --speed 10', { encoding: 'utf8' });
-      }).toThrow();
-      
-      expect(() => {
-        execSync('node bin/cli.js test.md --speed 1000', { encoding: 'utf8' });
-      }).toThrow();
-      
-      expect(() => {
-        execSync('node bin/cli.js test.md --speed 50', { encoding: 'utf8' });
-      }).toThrow();
-    });
-
-    test('should accept valid color themes', () => {
-      // Test all valid color themes
-      const validThemes = ['hacker', 'neon', 'classic', 'matrix', 'cyberpunk', 'retro', 'dark', 'rainbow'];
-      
-      validThemes.forEach(theme => {
-        expect(() => {
-          execSync(`node bin/cli.js test.md --color ${theme}`, { encoding: 'utf8' });
-        }).toThrow();
-      });
-    });
-
-    test('should accept unknown color themes gracefully', () => {
-      expect(() => {
-        execSync('node bin/cli.js test.md --color unknown', { encoding: 'utf8' });
-      }).toThrow();
-    });
-  });
-
-  describe('integration', () => {
-    test('should process a real README file end-to-end', () => {
-      // This test will work if README.md exists
-      try {
-        execSync('node bin/cli.js README.md --color hacker --speed 50', { encoding: 'utf8' });
-        // If it succeeds, that's great
-      } catch (error) {
-        // If it fails, that's also expected if README.md doesn't exist
-        expect(error.message).toContain('File');
-      }
-    });
+    }
   });
 });

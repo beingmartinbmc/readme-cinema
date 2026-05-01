@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { colorize } from './runtime.js';
 
 export class SyntaxHighlighter {
   constructor(theme) {
@@ -40,7 +40,7 @@ export class SyntaxHighlighter {
 
   highlight(code, language = 'text') {
     if (!language || language === 'text') {
-      return chalk[this.theme.code](code);
+      return colorize(this.theme.code, code);
     }
 
     const lang = language.toLowerCase();
@@ -55,11 +55,11 @@ export class SyntaxHighlighter {
     for (const pattern of patterns) {
       const regex = new RegExp(pattern.regex, 'g');
       highlighted = highlighted.replace(regex, (match) => {
-        return chalk[pattern.color](match);
+        return colorize(pattern.color, match);
       });
     }
 
-    return chalk[color](highlighted);
+    return colorize(color, highlighted);
   }
 
   getSyntaxPatterns(language) {
@@ -122,7 +122,7 @@ export class SyntaxHighlighter {
     const lang = language.toLowerCase();
     const color = this.languageColors[lang] || this.theme.code;
     
-    return chalk[color](code);
+    return colorize(color, code);
   }
 
   getLanguageColor(language) {
