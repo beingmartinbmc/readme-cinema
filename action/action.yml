@@ -1,0 +1,116 @@
+name: 'README Cinema Demo Generator'
+description: 'Auto-generate a cinematic demo GIF/SVG from your README and commit it to your repo'
+branding:
+  icon: 'film'
+  color: 'green'
+
+inputs:
+  readme:
+    description: 'Path to the README file'
+    required: false
+    default: 'README.md'
+  output:
+    description: 'Output file path for the demo'
+    required: false
+    default: 'demo.gif'
+  format:
+    description: 'Output format: gif, svg, or cast'
+    required: false
+    default: 'gif'
+  preset:
+    description: 'Visual preset: dramatic, hacker-mode, startup-pitch, minimal, retro, rainbow'
+    required: false
+    default: 'hacker-mode'
+  theme:
+    description: 'Color theme (overrides preset theme)'
+    required: false
+    default: ''
+  width:
+    description: 'Terminal width in columns'
+    required: false
+    default: '80'
+  height:
+    description: 'Terminal height in rows'
+    required: false
+    default: '24'
+  commit:
+    description: 'Auto-commit the generated demo file'
+    required: false
+    default: 'true'
+  commit-message:
+    description: 'Commit message for the auto-commit'
+    required: false
+    default: 'chore: update README demo [readme-cinema]'
+
+outputs:
+  demo-path:
+    description: 'Path to the generated demo file'
+  format:
+    description: 'Format of the generated demo'
+  frames:
+    description: 'Number of frames in the recording'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Rust toolchain (for agg)
+      if: inputs.format == 'gif'
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache agg binary
+      if: inputs.format == 'gif'
+      id: cache-agg
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/agg
+        key: agg-binary-${{ runner.os }}
+
+    - name: Install agg
+      if: inputs.format == 'gif' && steps.cache-agg.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo install --git https://github.com/asciinema/agg
+
+    - name: Install svg-term-cli
+      if: inputs.format == 'svg'
+      shell: bash
+      run: npm install -g svg-term-cli
+
+    - name: Install readme-cinema
+      shell: bash
+      run: npm install -g readme-cinema
+
+    - name: Generate demo
+      id: generate
+      shell: bash
+      run: |
+        ARGS="${{ inputs.readme }}"
+        ARGS="$ARGS --${{ inputs.format }} ${{ inputs.output }}"
+        ARGS="$ARGS --width ${{ inputs.width }} --height ${{ inputs.height }}"
+
+        if [ -n "${{ inputs.preset }}" ]; then
+          ARGS="$ARGS --preset ${{ inputs.preset }}"
+        fi
+
+        if [ -n "${{ inputs.theme }}" ]; then
+          ARGS="$ARGS --color ${{ inputs.theme }}"
+        fi
+
+        readme-cinema $ARGS
+
+        echo "demo-path=${{ inputs.output }}" >> "$GITHUB_OUTPUT"
+        echo "format=${{ inputs.format }}" >> "$GITHUB_OUTPUT"
+
+    - name: Commit demo
+      if: inputs.commit == 'true'
+      shell: bash
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add "${{ inputs.output }}"
+        git diff --cached --quiet || git commit -m "${{ inputs.commit-message }}"
+        git push

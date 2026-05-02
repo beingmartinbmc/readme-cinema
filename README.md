@@ -1,134 +1,179 @@
 # README Cinema
 
-Transform a Markdown README into a cinematic terminal presentation with ASCII art, typewriter text, syntax-colored code blocks, scene transitions, and optional feature progress bars.
+**Auto-generate cinematic README demo GIFs from markdown — zero effort.**
+
+Every repo should have a demo GIF. README Cinema makes it one command.
 
 ## Quick Start
 
 ```bash
 npm install -g readme-cinema
+
+# Cinematic terminal playback
 readme-cinema
+
+# Export a demo GIF (requires agg)
+readme-cinema --gif
+
+# Export with a preset
+readme-cinema --preset hacker-mode --gif demo.gif
+
+# Export SVG animation (requires svg-term-cli)
+readme-cinema --svg
+
+# Export asciinema .cast recording
+readme-cinema --cast
 ```
 
-Run it against any Markdown file:
+## Presets
+
+Presets combine speed, theme, and effects into one flag:
+
+| Preset | Speed | Theme | Vibe |
+|---|---|---|---|
+| `--preset dramatic` | 80ms | cyberpunk | Slow reveal, full effects |
+| `--preset hacker-mode` | 15ms | matrix | Fast, green, raw |
+| `--preset startup-pitch` | 40ms | neon | Clean, punchy |
+| `--preset minimal` | 0ms | dark | No effects, instant |
+| `--preset retro` | 60ms | retro | Warm, nostalgic |
+| `--preset rainbow` | 35ms | rainbow | Colorful, fun |
 
 ```bash
-readme-cinema ./docs/intro.md --color neon --progress --speed 30
+readme-cinema --preset startup-pitch
+readme-cinema --preset hacker-mode --gif
 ```
 
-Use `--instant` when you want a fast preview without animation delays:
+## GitHub Action
+
+Add to `.github/workflows/demo.yml` for automatic demo generation on every push:
+
+```yaml
+name: Update Demo
+on:
+  push:
+    branches: [main]
+    paths: ['README.md']
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: beingmartinbmc/readme-cinema/action@main
+        with:
+          preset: hacker-mode
+          format: gif
+          output: demo.gif
+```
+
+Then add to your README:
+
+```markdown
+![Demo](demo.gif)
+```
+
+### Action Inputs
+
+| Input | Default | Description |
+|---|---|---|
+| `readme` | `README.md` | Path to README file |
+| `output` | `demo.gif` | Output file path |
+| `format` | `gif` | Output format: `gif`, `svg`, `cast` |
+| `preset` | `hacker-mode` | Visual preset |
+| `theme` | | Color theme (overrides preset) |
+| `width` | `80` | Terminal width in columns |
+| `height` | `24` | Terminal height in rows |
+| `commit` | `true` | Auto-commit the generated file |
+| `commit-message` | `chore: update README demo [readme-cinema]` | Commit message |
+
+## CLI Reference
+
+```
+Usage: readme-cinema [file] [options]
+
+Arguments:
+  file                    Path to README file (default: ./README.md)
+
+Options:
+  -s, --speed <ms>        Typewriter speed in milliseconds (default: 50)
+  -c, --color <theme>     Color theme (default: hacker)
+  -p, --progress          Show progress bars for feature items
+  --preset <name>         Apply a visual preset
+  --gif [output]          Export demo GIF (requires agg)
+  --svg [output]          Export demo SVG (requires svg-term-cli)
+  --cast [output]         Export asciinema .cast recording
+  --width <cols>          Terminal width for exports (default: 80)
+  --height <rows>         Terminal height for exports (default: 24)
+  --instant               Render without animation delays
+  --no-banner             Skip ASCII title banner
+  --no-transitions        Disable section transitions
+  --no-clear              Don't clear terminal before rendering
+  --list-themes           List available color themes
+  --list-presets          List available presets
+  -V, --version           Show version
+  -h, --help              Show help
+```
+
+## Themes
+
+8 built-in themes: `hacker`, `neon`, `classic`, `matrix`, `cyberpunk`, `retro`, `dark`, `rainbow`
 
 ```bash
-readme-cinema README.md --instant --no-clear
+readme-cinema --color matrix
+readme-cinema --list-themes
 ```
 
-## Features
+## Programmatic API
 
-- Cinematic ASCII title banner with a glitch reveal.
-- Typewriter rendering with natural punctuation, space, number, and capitalization pacing.
-- Scene transitions between major Markdown sections.
-- Syntax-colored fenced code blocks for JavaScript, TypeScript, Python, HTML, CSS, JSON, YAML, Bash, and more.
-- Deterministic progress bars for feature-like list items.
-- Eight terminal themes: `hacker`, `neon`, `classic`, `matrix`, `cyberpunk`, `retro`, `dark`, and `rainbow`.
-- Testable programmatic API with injectable output, sleep, and randomness for deterministic automation.
+```js
+import { readmeCinema, generateDemo, getAvailablePresets, resolvePreset } from 'readme-cinema';
 
-## CLI
+// Terminal playback
+await readmeCinema('README.md', { color: 'neon', speed: 30 });
+
+// Generate a .cast file
+await generateDemo('README.md', 'demo.cast', { format: 'cast', preset: 'dramatic' });
+
+// Generate a GIF (requires agg installed)
+await generateDemo('README.md', 'demo.gif', { format: 'gif', banner: false });
+
+// Resolve a preset to its config
+const config = resolvePreset('hacker-mode');
+// { speed: 15, color: 'matrix', progress: true, transitions: true, banner: true }
+```
+
+## Export Formats
+
+| Format | Tool Required | Use Case |
+|---|---|---|
+| `.cast` | None | asciinema player, further conversion |
+| `.gif` | [agg](https://github.com/asciinema/agg) | README embeds, social sharing |
+| `.svg` | [svg-term-cli](https://github.com/marionebl/svg-term-cli) | Crisp, scalable animations |
+
+### Installing Export Tools
 
 ```bash
-readme-cinema [file] [options]
-```
+# For GIF export (agg)
+cargo install --git https://github.com/asciinema/agg
 
-`file` defaults to `./README.md`.
-
-| Option | Description | Default |
-| --- | --- | --- |
-| `-s, --speed <ms>` | Typewriter speed in milliseconds. Must be a non-negative integer. | `50` |
-| `-c, --color <theme>` | Theme name. Run `--list-themes` to see valid values. | `hacker` |
-| `-p, --progress` | Add progress bars to feature-like list items. | `false` |
-| `-t, --transitions` | Enable scene transitions. | `true` |
-| `--no-transitions` | Disable scene transitions. | |
-| `--banner` / `--no-banner` | Show or skip the ASCII banner. | `true` |
-| `--clear` / `--no-clear` | Clear or preserve the terminal before rendering. | `true` |
-| `--instant` | Skip animation delays for previews and automation. | `false` |
-| `--list-themes` | Print available themes and exit. | |
-
-## Examples
-
-```bash
-# Cyberpunk-style preview
-readme-cinema README.md --color neon --progress --instant
-
-# Matrix mode with full cinematic timing
-readme-cinema README.md --color matrix --transitions
-
-# Quiet preview that keeps existing terminal output visible
-readme-cinema README.md --instant --no-banner --no-clear --no-transitions
-```
-
-## Programmatic Usage
-
-```javascript
-import { readmeCinema, getAvailableThemes } from 'readme-cinema';
-
-console.log(getAvailableThemes());
-
-const summary = await readmeCinema('./README.md', {
-  speed: 30,
-  color: 'hacker',
-  progress: true,
-  transitions: true,
-  instant: false
-});
-
-console.log(summary);
-```
-
-`readmeCinema()` resolves with a small summary:
-
-```javascript
-{
-  filePath: './README.md',
-  theme: 'hacker',
-  tokensProcessed: 12
-}
-```
-
-For tests or custom renderers, pass an output adapter:
-
-```javascript
-await readmeCinema('./README.md', {
-  instant: true,
-  output: {
-    write: (text) => process.stdout.write(text),
-    log: (...args) => console.log(...args),
-    error: (...args) => console.error(...args),
-    clear: () => {}
-  }
-});
+# For SVG export
+npm install -g svg-term-cli
 ```
 
 ## Development
 
 ```bash
-npm ci
-npm run lint
-npm run test:ci
-npm run build
+git clone https://github.com/beingmartinbmc/readme-cinema.git
+cd readme-cinema
+npm install
+
+npm test              # Run tests with coverage
+npm run lint          # ESLint
+npm run dev           # Quick local demo
 ```
-
-The Jest configuration enforces at least 90% global coverage for statements, branches, functions, and lines. The current suite is deterministic and runs the animation code in instant mode.
-
-## Release
-
-1. Make changes on a feature branch.
-2. Run `npm run lint`, `npm run test:ci`, `npm run build`, and `npm audit --audit-level=moderate`.
-3. Update `package.json` with the next version.
-4. Tag the release as `vX.Y.Z`.
-5. Publish to npm and create GitHub release notes from the tag.
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
-
-## Author
-
-Ankit Sharma - [ankit.sharma199803@gmail.com](mailto:ankit.sharma199803@gmail.com)
+MIT

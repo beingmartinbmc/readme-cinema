@@ -4,6 +4,7 @@ import os from 'os';
 import path from 'path';
 import { createProgram, parseSpeed, runCli } from '../src/cli.js';
 import { getAvailableThemes } from '../src/index.js';
+import { getAvailablePresets } from '../src/presets.js';
 import { createMockOutput } from './helpers.js';
 
 describe('CLI program', () => {
@@ -63,6 +64,60 @@ describe('CLI program', () => {
     expect(logs.join('\n')).toContain(getAvailableThemes()[0]);
   });
 
+  test('lists presets without reading a file', async () => {
+    const action = jest.fn();
+    const { output, logs } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync(['node', 'readme-cinema', '--list-presets']);
+
+    expect(action).not.toHaveBeenCalled();
+    const logOutput = logs.join('\n');
+    for (const preset of getAvailablePresets()) {
+      expect(logOutput).toContain(preset);
+    }
+  });
+
+  test('applies preset options when --preset is used', async () => {
+    const filePath = path.join(tempDir, 'README.md');
+    await fs.writeFile(filePath, '# Preset');
+    const action = jest.fn().mockResolvedValue();
+    const { output } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync([
+      'node',
+      'readme-cinema',
+      filePath,
+      '--preset',
+      'dramatic'
+    ]);
+
+    expect(action).toHaveBeenCalledWith(
+      filePath,
+      expect.objectContaining({
+        speed: 80,
+        color: 'cyberpunk',
+        progress: true
+      })
+    );
+  });
+
+  test('reports unknown presets', async () => {
+    const action = jest.fn();
+    const { output, errors } = createMockOutput();
+
+    await createProgram({ action, output }).parseAsync([
+      'node',
+      'readme-cinema',
+      'README.md',
+      '--preset',
+      'nonexistent'
+    ]);
+
+    expect(errors.join('\n')).toContain("Unknown preset 'nonexistent'");
+    expect(process.exitCode).toBe(1);
+    expect(action).not.toHaveBeenCalled();
+  });
+
   test('reports missing files and unknown themes', async () => {
     const action = jest.fn();
     const { output, errors, logs } = createMockOutput();
@@ -90,6 +145,63 @@ describe('CLI program', () => {
     expect(() => parseSpeed('-1')).toThrow('non-negative integer');
     expect(() => parseSpeed('1.5')).toThrow('non-negative integer');
     expect(() => parseSpeed('fast')).toThrow('non-negative integer');
+  });
+
+  test('exports .cast file via --cast flag', async () => {
+    const filePath = path.join(tempDir, 'README.md');
+    await fs.writeFile(filePath, '# Cast Test');
+    const castPath = path.join(tempDir, 'output.cast');
+    const { output, logs } = createMockOutput();
+
+    await createProgram({ output }).parseAsync([
+      'node',
+      'readme-cinema',
+      filePath,
+      '--cast',
+      castPath,
+      '--no-banner'
+    ]);
+
+    const logOutput = logs.join('\n');
+    expect(logOutput).toContain('Recording CAST demo');
+    expect(logOutput).toContain('Saved CAST to');
+    expect(await fs.pathExists(castPath)).toBe(true);
+  });
+
+  test('export uses default output name when flag has no value', async () => {
+    const filePath = path.join(tempDir, 'README.md');
+    await fs.writeFile(filePath, '# Default output');
+    const { output, logs } = createMockOutput();
+
+    await createProgram({ output }).parseAsync([
+      'node',
+      'readme-cinema',
+      filePath,
+      '--cast',
+      '--no-banner'
+    ]);
+
+    expect(logs.join('\n')).toContain('Saved CAST to');
+    const expectedCast = filePath.replace('.md', '.cast');
+    await fs.remove(expectedCast);
+  });
+
+  test('export fails gracefully when tool is missing', async () => {
+    const filePath = path.join(tempDir, 'README.md');
+    await fs.writeFile(filePath, '# GIF');
+    const { output, errors } = createMockOutput();
+
+    await createProgram({ output }).parseAsync([
+      'node',
+      'readme-cinema',
+      filePath,
+      '--gif',
+      path.join(tempDir, 'out.gif'),
+      '--no-banner'
+    ]);
+
+    expect(process.exitCode).toBe(1);
+    expect(errors.join('\n')).toContain('Export failed');
   });
 
   test('writes help through fallback writer output', async () => {

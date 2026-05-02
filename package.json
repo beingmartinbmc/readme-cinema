@@ -1,7 +1,7 @@
 {
   "name": "readme-cinema",
-  "version": "1.1.0",
-  "description": "Transform your README files into cinematic terminal experiences with ASCII art, typewriter effects, and dramatic transitions",
+  "version": "1.2.0",
+  "description": "Auto-generate cinematic README demo GIFs, SVGs, and recordings — with presets like --dramatic, --hacker-mode, and --startup-pitch",
   "main": "index.js",
   "type": "module",
   "bin": {
@@ -10,6 +10,7 @@
   "files": [
     "bin",
     "src",
+    "action",
     "index.js",
     "README.md",
     "LICENSE"
@@ -31,12 +32,18 @@
   "keywords": [
     "cli",
     "readme",
+    "demo",
+    "gif",
+    "generator",
     "terminal",
     "ascii",
     "cinematic",
     "typewriter",
+    "github-action",
+    "asciinema",
     "hacker",
-    "markdown"
+    "markdown",
+    "devtools"
   ],
   "author": "Ankit Sharma <ankit.sharma199803@gmail.com>",
   "license": "MIT",

@@ -1,6 +1,8 @@
 import { Command, InvalidArgumentError } from 'commander';
 import fs from 'fs-extra';
 import { readmeCinema, getAvailableThemes } from './index.js';
+import { getAvailablePresets, resolvePreset } from './presets.js';
+import { generateDemo } from './recorder.js';
 
 const packageJson = fs.readJsonSync(new URL('../package.json', import.meta.url));
 
@@ -44,6 +46,13 @@ export function createProgram({ action = readmeCinema, output = console } = {}) 
     .option('--no-clear', 'Do not clear the terminal before rendering')
     .option('--instant', 'Render without animation delays')
     .option('--list-themes', 'Print available color themes and exit')
+    .option('--preset <name>', `Apply a preset: ${getAvailablePresets().join(', ')}`)
+    .option('--list-presets', 'Print available presets and exit')
+    .option('--gif [output]', 'Export a demo GIF (requires agg)')
+    .option('--svg [output]', 'Export a demo SVG (requires svg-term-cli)')
+    .option('--cast [output]', 'Export an asciinema .cast recording')
+    .option('--width <cols>', 'Terminal width for exports', parseSpeed, 80)
+    .option('--height <rows>', 'Terminal height for exports', parseSpeed, 24)
     .configureOutput({
       writeOut: (text) => writeOutput(output, 'log', text.trimEnd()),
       writeErr: (text) => writeOutput(output, 'error', text.trimEnd())
@@ -54,8 +63,33 @@ export function createProgram({ action = readmeCinema, output = console } = {}) 
         return;
       }
 
-      if (!getAvailableThemes().includes(options.color)) {
-        writeOutput(output, 'error', `Unknown color theme '${options.color}'. Try --list-themes.`);
+      if (options.listPresets) {
+        writeOutput(output, 'log', getAvailablePresets().join('\n'));
+        return;
+      }
+
+      let mergedOptions = {
+        speed: options.speed,
+        color: options.color,
+        progress: options.progress,
+        transitions: options.transitions,
+        banner: options.banner,
+        clearScreen: options.clear,
+        instant: options.instant
+      };
+
+      if (options.preset) {
+        const preset = resolvePreset(options.preset);
+        if (!preset) {
+          writeOutput(output, 'error', `Unknown preset '${options.preset}'. Try --list-presets.`);
+          process.exitCode = 1;
+          return;
+        }
+        mergedOptions = { ...mergedOptions, ...preset };
+      }
+
+      if (!getAvailableThemes().includes(mergedOptions.color)) {
+        writeOutput(output, 'error', `Unknown color theme '${mergedOptions.color}'. Try --list-themes.`);
         process.exitCode = 1;
         return;
       }
@@ -67,15 +101,33 @@ export function createProgram({ action = readmeCinema, output = console } = {}) 
         return;
       }
 
-      await action(file, {
-        speed: options.speed,
-        color: options.color,
-        progress: options.progress,
-        transitions: options.transitions,
-        banner: options.banner,
-        clearScreen: options.clear,
-        instant: options.instant
-      });
+      const isExport = options.gif || options.svg || options.cast;
+
+      if (isExport) {
+        const format = options.gif ? 'gif' : options.svg ? 'svg' : 'cast';
+        const defaultExt = { gif: '.gif', svg: '.svg', cast: '.cast' }[format];
+        const exportValue = options.gif || options.svg || options.cast;
+        const outputPath = typeof exportValue === 'string'
+          ? exportValue
+          : file.replace(/\.[^.]+$/, defaultExt);
+
+        try {
+          writeOutput(output, 'log', `Recording ${format.toUpperCase()} demo...`);
+          const result = await generateDemo(file, outputPath, {
+            ...mergedOptions,
+            format,
+            width: options.width,
+            height: options.height
+          });
+          writeOutput(output, 'log', `Saved ${result.format.toUpperCase()} to ${result.outputPath} (${result.eventCount} frames)`);
+        } catch (err) {
+          writeOutput(output, 'error', `Export failed: ${err.message}`);
+          process.exitCode = 1;
+        }
+        return;
+      }
+
+      await action(file, mergedOptions);
     });
 
   return program;
